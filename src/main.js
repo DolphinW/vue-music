@@ -4,10 +4,15 @@ import App from './App'
 import fastclick from 'fastclick'
 import 'common/stylus/index.styl'
 import router from './router'
-
+import VueLazyload from 'vue-lazyload'
+/* eslint-disable */
 // Vue.config.productionTip = false
 
 fastclick.attach(document.body)
+// 全局声明懒加载，设置默认图。
+Vue.use(VueLazyload , {
+  loading: require('common/image/default.png')
+})
 
 /* eslint-disable no-new */
 new Vue({

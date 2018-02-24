@@ -1,0 +1,30 @@
+<template>
+  <div class="loading">
+    <img width="24" height="24" src="./loading.gif">
+    <p class="desc">{{title}}</p>
+  </div>
+</template>
+
+<script>
+/* eslint-disable */
+  export default {
+    name: "loading",
+    props: {
+      title: {
+        type: String,
+        default: "客官，马上就来……"
+      }
+    }
+  }
+</script>
+
+<style scoped lang="stylus" rel="stylesheet/stylus">
+  import "~common/stylus/variable"
+
+  .loading
+    width: 100%
+    .desc
+      line-height: 20px
+      font-size: $font-size-small
+      color: $color-text-l
+</style>
