@@ -40,7 +40,7 @@
         getRecommend().then(res => {
           if (res.code === ERR_OK) {
             this.recommendSliders = res.data.slider;
-            console.log(this.recommendSliders);
+            // console.log(this.recommendSliders);
           }
         })
       }
