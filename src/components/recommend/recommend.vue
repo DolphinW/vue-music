@@ -1,30 +1,32 @@
 <template>
   <div class="recommend">
-    <div class="recommend-content">
-      <div class="slider-wrapper" v-if="recommendSliders.length">
-        <slider>
-          <div v-for="item in recommendSliders" :key="item.id">
-            <a :href="item.linkUrl">
-              <img :src="item.picUrl" alt="">
-            </a>
-          </div>
-        </slider>
-      </div>
-      <div class="recommend-list">
-        <h2 class="list-title">推荐列表</h2>
-        <ul>
-          <li class="item" v-for="(item,index) in discLists" :key="index">
-            <div class="icon">
-              <img :src="item.imgurl" width="60" height="60">
+    <scroll ref="scroll" class="recommend-content" :data="discLists">
+      <div>
+        <div class="slider-wrapper" v-if="recommendSliders.length">
+          <slider>
+            <div v-for="item in recommendSliders" :key="item.id">
+              <a :href="item.linkUrl">
+                <img @load="loadImage" :src="item.picUrl" alt="">
+              </a>
             </div>
-            <div class="text">
-              <h2 class="name" v-html="item.creator.name"></h2>
-              <p class="desc" v-html="item.dissname"></p>
-            </div>
-          </li>
-        </ul>
+          </slider>
+        </div>
+        <div class="recommend-list">
+          <h2 class="list-title">推荐列表</h2>
+          <ul>
+            <li class="item" v-for="(item,index) in discLists" :key="index">
+              <div class="icon">
+                <img :src="item.imgurl" width="60" height="60">
+              </div>
+              <div class="text">
+                <h2 class="name" v-html="item.creator.name"></h2>
+                <p class="desc" v-html="item.dissname"></p>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
-    </div>
+    </scroll>
   </div>
 </template>
 
@@ -33,13 +35,15 @@
   import {getRecommend, getRecommendList} from '../../api/recommend'
   import {ERR_OK} from '../../api/config'
   import Slider from '../../base/slider/slider'
+  import Scroll from '../../base/scroll/scroll'
 
   export default {
     name: 'recommend',
     data() {
       return {
         recommendSliders: [],
-        discLists: []
+        discLists: [],
+        isCheckLoaded:false
       }
     },
     created() {
@@ -60,10 +64,17 @@
             this.discLists = res.data.list;
           }
         })
+      },
+      loadImage(){
+        if(!this.isCheckLoaded){
+          this.$refs.scroll.refresh()
+          this.isCheckLoaded=true
+        }
       }
     },
     components: {
-      Slider
+      Slider,
+      Scroll
     }
   }
 </script>
