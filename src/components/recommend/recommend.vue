@@ -4,15 +4,24 @@
       <div class="slider-wrapper" v-if="recommendSliders.length">
         <slider>
           <div v-for="item in recommendSliders" :key="item.id">
-              <a :href="item.linkUrl">
-                <img :src="item.picUrl" alt="">
-              </a>
+            <a :href="item.linkUrl">
+              <img :src="item.picUrl" alt="">
+            </a>
           </div>
         </slider>
       </div>
-      <div class="recommend-lists">
+      <div class="recommend-list">
+        <h2 class="list-title">推荐列表</h2>
         <ul>
-
+          <li class="item" v-for="(item,index) in discLists" :key="index">
+            <div class="icon">
+              <img :src="item.imgurl" width="60" height="60">
+            </div>
+            <div class="text">
+              <h2 class="name" v-html="item.creator.name"></h2>
+              <p class="desc" v-html="item.dissname"></p>
+            </div>
+          </li>
         </ul>
       </div>
     </div>
@@ -21,7 +30,7 @@
 
 <script>
 /* eslint-disable */
-  import {getRecommend} from '../../api/recommend'
+  import {getRecommend, getRecommendList} from '../../api/recommend'
   import {ERR_OK} from '../../api/config'
   import Slider from '../../base/slider/slider'
 
@@ -29,18 +38,26 @@
     name: 'recommend',
     data() {
       return {
-        recommendSliders: []
+        recommendSliders: [],
+        discLists: []
       }
     },
     created() {
       this._getRecommend()
+      this._getRecommendList()
     },
     methods: {
       _getRecommend() {
         getRecommend().then(res => {
           if (res.code === ERR_OK) {
             this.recommendSliders = res.data.slider;
-            // console.log(this.recommendSliders);
+          }
+        })
+      },
+      _getRecommendList() {
+        getRecommendList().then(res => {
+          if (res.code === ERR_OK) {
+            this.discLists = res.data.list;
           }
         })
       }
