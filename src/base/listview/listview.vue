@@ -28,6 +28,12 @@
         {{item}}
       </li>
     </ul>
+    <div class="list-fixed" v-show="fixedTitle" ref="fixed">
+      <div class="fixed-title">{{fixedTitle}}</div>
+    </div>
+    <div class="loading-container" v-show="!data.length">
+      <loading></loading>
+    </div>
   </scroll>
 </template>
 
@@ -35,9 +41,10 @@
 /* eslint-disable */
   import Scroll from '../../base/scroll/scroll'
   import {getData} from '../../common/js/dom'
-
+  import Loading from '../../base/loading/loading'
 // 与样式统一每一个shotcut的高度
 const SHOTCUT_HEIGHT=18
+const FIXED_HEIGHT=30
 
   export default {
     props: {
@@ -56,7 +63,8 @@ const SHOTCUT_HEIGHT=18
     data(){
       return {
         currentIndex:0,
-        scrollY:-1
+        scrollY:-1,
+        diff:-1
       }
     },
     computed:{
@@ -64,6 +72,9 @@ const SHOTCUT_HEIGHT=18
         return this.data.map(item=>{
           return item.title.substr(0,1)
         })
+      },
+      fixedTitle(){
+        return this.data[this.currentIndex] && this.scrollY>=0 ?this.data[this.currentIndex].title:""
       }
     },
     watch:{
@@ -89,9 +100,22 @@ const SHOTCUT_HEIGHT=18
           // 在中间正常区域滚动时
           if(newVal>y1 && newVal<y2){
             this.currentIndex=i
+            this.diff=y2-newVal
+            console.log(this.diff);
             break
           }
         }
+      },
+      diff(newVal){
+        // 此方法用于切换效果的实现
+        let fixedTop=(newVal<=FIXED_HEIGHT && newVal>0)?FIXED_HEIGHT-newVal:0
+        // 优化性能
+        if(this.fixedTop==fixedTop){
+          return
+        }
+        this.fixedTop=fixedTop
+        // 3d加速
+        this.$refs.fixed.style.transform=`translate3d(0,${-fixedTop}px,0)`
       }
     },
     methods:{
@@ -129,7 +153,8 @@ const SHOTCUT_HEIGHT=18
       }
     },
     components:{
-      Scroll
+      Scroll,
+      Loading
     }
   }
 </script>
