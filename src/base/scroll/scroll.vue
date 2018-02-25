@@ -24,6 +24,10 @@
       data:{
         type:Array,
         default:null
+      },
+      listenScroll:{
+        type:Boolean,
+        default:false
       }
     },
     mounted(){
@@ -40,6 +44,12 @@
           probeType:this.probeType,
           click:this.click
         })
+        if(this.listenScroll){
+          let _this=this
+          this.scroll.on('scroll',(position)=>{
+            _this.$emit('scroll',position)
+          })
+        }
       },
       enable(){
         this.scroll && this.scroll.enable()
@@ -49,6 +59,9 @@
       },
       refresh(){
         this.scroll && this.scroll.refresh()
+      },
+      scrollToElement(el,time){
+        this.scroll && this.scroll.scrollToElement(el,time)
       }
     },
     watch:{

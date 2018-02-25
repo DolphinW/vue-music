@@ -6,7 +6,8 @@
           <slider>
             <div v-for="item in recommendSliders" :key="item.id">
               <a :href="item.linkUrl">
-                <img @load="loadImage" :src="item.picUrl">
+                <!--使用fastClick提供的类名，解决阻止BScroll进行click的问题-->
+                <img class="needsclick" @load="loadImage" :src="item.picUrl">
               </a>
             </div>
           </slider>
