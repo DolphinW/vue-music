@@ -11,6 +11,8 @@
   import {getSingerList} from '../../api/singer'
   import {ERR_OK} from '../../api/config'
   import Singer from '../../common/js/singer'
+  import {mapMutations} from 'vuex'
+
 
   const HOT_NAME = "热门"
   const HOT_LIST_LEN = 10
@@ -62,7 +64,6 @@
             item.Fsinger_name
           ))
         })
-        console.log(map);
         // 处理排序
         let hot=[]
         let ret=[]
@@ -83,7 +84,13 @@
         this.$router.push( {
           path:`/singer/${singer.id}`
         })
-      }
+        this.setSinger(singer)
+      },
+      // 由于mapMutations中均是设置state的方法，所以在methods中
+      // 这里起的别名，右侧是与mutation-types中等号右侧的值相等的。
+      ...mapMutations({
+        setSinger:'SET_SINGER'
+      })
     }
   }
 </script>

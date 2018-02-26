@@ -6,8 +6,18 @@
 
 <script>
 /* eslint-disable */
-    export default {
+import {mapGetters} from 'vuex'
 
+    export default {
+      created(){
+        console.log(this.singer);
+      },
+      computed:{
+        // 由于getters获取到的是结果，所以在computed中
+        ...mapGetters([
+          'singer'
+        ])
+      }
     }
 </script>
 
