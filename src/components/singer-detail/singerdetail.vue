@@ -7,16 +7,44 @@
 <script>
 /* eslint-disable */
 import {mapGetters} from 'vuex'
+import {getSingerDetail} from '../../api/singer'
+import {ERR_OK} from "../../api/config";
+import {createSong} from "../../common/js/song";
 
-    export default {
+export default {
       created(){
-        console.log(this.singer);
+        this.initSingerDetai()
+      },
+      data(){
+        return {
+          songs:[]
+        }
       },
       computed:{
         // 由于getters获取到的是结果，所以在computed中
         ...mapGetters([
           'singer'
         ])
+      },
+      methods:{
+        initSingerDetai(){
+          if(!this.singer.id){
+            this.$router.push('/singer')
+            return
+          }
+          getSingerDetail(this.singer.id).then(res=>{
+            if(res.code===ERR_OK){
+              this.songs=this._normalizeSongs(res.data.list)
+            }
+          })
+        },
+        _normalizeSongs(list){
+          let ret=[]
+          list.forEach((item)=>{
+            ret.push(createSong(item.musicData))
+          })
+          return ret
+        }
       }
     }
 </script>
