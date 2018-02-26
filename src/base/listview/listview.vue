@@ -101,7 +101,6 @@ const FIXED_HEIGHT=30
           if(newVal>y1 && newVal<y2){
             this.currentIndex=i
             this.diff=y2-newVal
-            console.log(this.diff);
             break
           }
         }
