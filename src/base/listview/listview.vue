@@ -10,7 +10,7 @@
       <li v-for="(group,index) in data" :key="index" class="list-group" ref="listGroup">
         <p class="list-group-title">{{group.title}}</p>
         <ul>
-          <li v-for="(item,ind) in group.items" :key="ind" class="list-group-item">
+          <li @click="onSingerClick(item)" v-for="(item,ind) in group.items" :key="ind" class="list-group-item">
             <img v-lazy="item.avatar"  class="avatar" />
             <span class="name">{{item.name}}</span>
           </li>
@@ -130,6 +130,9 @@ const FIXED_HEIGHT=30
         let newIndex=this.touch.startIndex+delta
         this._scrollTo(newIndex)
       },
+      onSingerClick(item){
+        this.$emit('select',item)
+      },
       _scroll(pos){
         this.scrollY=-pos.y
       },
@@ -224,4 +227,5 @@ const FIXED_HEIGHT=30
       width: 100%
       top: 50%
       transform: translateY(-50%)
+      text-align:center
 </style>
