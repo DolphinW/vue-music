@@ -37,8 +37,12 @@
 import Scroll from '../../base/scroll/scroll'
 import SongList from '../../base/song-list/song-list'
 import Loading from '../../base/loading/loading'
+import {prefixStyle} from '../../common/js/dom'
 
 const PRESERVE_SPACE=40
+// 为了便于js中兼容性的设置样式，封装了一个通过能力检测获取的属性名，来设置样式
+const transform=prefixStyle('transform')
+const backDropFilter=prefixStyle('backDropFilter')
 
   export default {
     name: "music-list",
@@ -102,8 +106,7 @@ const PRESERVE_SPACE=40
         }else{
           blur=Math.min(20,percent*20)
         }
-        this.$refs.layer.style['transform']=`translate3d(0,${translateY}px,0)`
-        this.$refs.layer.style['webkitTransform']=`translate3d(0,${translateY}px,0)`
+        this.$refs.layer.style[transform]=`translate3d(0,${translateY}px,0)`
         // 解决list滚出层的样式问题，修改bgImage的zIndex，用于遮挡;
         // 但由于图片过高，导致遮挡区域太大，故同时需要修改图片的高度;
         // 同时需要显示/隐藏播放器元素
@@ -119,11 +122,9 @@ const PRESERVE_SPACE=40
         }
         this.$refs.bgImage.style['zIndex']=zIndex
         // 下拉放大
-        this.$refs.bgImage.style['transform']=`scale(${scale})`
-        this.$refs.bgImage.style['webkitTransform']=`scale(${scale})`
+        this.$refs.bgImage.style[transform]=`scale(${scale})`
         // 上拉模糊，只在ios手机有效
-        this.$refs.bgImage.style['backDropFilter']=`blur(${blur})`
-        this.$refs.bgImage.style['webkitBackDropFilter']=`blur(${blur}px)`
+        this.$refs.bgImage.style[backDropFilter]=`blur(${blur})`
       }
     },
     components:{
