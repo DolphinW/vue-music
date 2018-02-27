@@ -23,7 +23,7 @@
       // 用于重新计算滚动区域的高度
       data:{
         type:Array,
-        default:null
+        default:[]
       },
       listenScroll:{
         type:Boolean,

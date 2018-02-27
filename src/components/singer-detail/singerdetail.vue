@@ -1,6 +1,8 @@
 <template>
   <transition name="slide">
-    <div class="singer-detail">详情页</div>
+    <div class="singer-detail">
+      <music-list :title="title" :bg-image="bgImage" :songs="songs"></music-list>
+    </div>
   </transition>
 </template>
 
@@ -10,6 +12,7 @@ import {mapGetters} from 'vuex'
 import {getSingerDetail} from '../../api/singer'
 import {ERR_OK} from "../../api/config";
 import {createSong} from "../../common/js/song";
+import MusicList from '../music-list/music-list'
 
 export default {
       created(){
@@ -24,10 +27,17 @@ export default {
         // 由于getters获取到的是结果，所以在computed中
         ...mapGetters([
           'singer'
-        ])
+        ]),
+        title(){
+          return this.singer.name
+        },
+        bgImage(){
+          return this.singer.avatar
+        }
       },
       methods:{
         initSingerDetai(){
+          console.log(this.singer);
           if(!this.singer.id){
             this.$router.push('/singer')
             return
@@ -45,6 +55,9 @@ export default {
           })
           return ret
         }
+      },
+      components:{
+        MusicList
       }
     }
 </script>

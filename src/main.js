@@ -11,6 +11,7 @@ import store from './store'
 // Vue.config.productionTip = false
 
 fastclick.attach(document.body)
+
 // 全局声明懒加载，设置默认图。
 Vue.use(VueLazyload , {
   loading: require('common/image/default.png')
