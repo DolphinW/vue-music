@@ -23,7 +23,7 @@
             class="list"
             ref="list">
       <div class="song-list-wrapper">
-        <song-list :songs="songs"></song-list>
+        <song-list @select="selectSong" :songs="songs"></song-list>
       </div>
       <div v-show="!songs.length" class="loading-container">
         <loading></loading>
@@ -89,6 +89,9 @@ const backDropFilter=prefixStyle('backDropFilter')
       },
       onScroll(pos){
         this.scrollY=pos.y
+      },
+      selectSong(song,index){
+        this.currentIndex(index)
       }
     },
     watch:{
