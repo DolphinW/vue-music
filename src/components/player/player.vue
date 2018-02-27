@@ -7,20 +7,20 @@
                 @after-leave="afterLeave">
       <div class="normal-player" v-show="fullScreen">
         <div class="bg">
-          <img width="100%" height="100%" :src="songInfo.image">
+          <img width="100%" height="100%" :src="currentSong.image">
         </div>
         <div class="top">
           <div class="back" @click="closeFullScreen">
             <i class="icon icon-back"></i>
           </div>
-          <h1 class="title" v-html="songInfo.name"></h1>
-          <h2 class="subtitle" v-html="songInfo.singer"></h2>
+          <h1 class="title" v-html="currentSong.name"></h1>
+          <h2 class="subtitle" v-html="currentSong.singer"></h2>
         </div>
         <div class="middle">
           <div class="middle-l">
             <div class="cd-wrapper" ref="cdWrapper">
-              <div class="cd">
-                <img :src="songInfo.image" class="image">
+              <div class="cd" :class="cdCls">
+                <img :src="currentSong.image" class="image">
               </div>
             </div>
           </div>
@@ -37,7 +37,7 @@
               <i class="icon icon-prev"></i>
             </div>
             <div class="icon i-center">
-              <i class="icon icon-play"></i>
+              <i @click="togglePlaying" :class="playIcon"></i>
             </div>
             <div class="icon i-right">
               <i class="icon icon-next"></i>
@@ -52,20 +52,21 @@
     <transition name="mini" >
       <div class="mini-player" v-show="!fullScreen" @click="openFullScreen">
         <div class="icon">
-          <img :src="songInfo.image" width="40" height="40">
+          <img :class="cdCls" :src="currentSong.image" width="40" height="40">
         </div>
         <div class="text">
-          <h2 class="name" v-html="songInfo.name"></h2>
-          <p class="desc" v-html="songInfo.singer"></p>
+          <h2 class="name" v-html="currentSong.name"></h2>
+          <p class="desc" v-html="currentSong.singer"></p>
         </div>
         <div class="control">
-          <i class="icon-mini"></i>
+          <i @click.stop="togglePlaying" :class="miniIcon"></i>
         </div>
         <div class="control" >
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
+    <audio ref="audio" :src="currentSong.url"></audio>
   </div>
 </template>
 
@@ -80,11 +81,35 @@ const transform=prefixStyle('transform')
   export default {
     name: "player",
     computed:{
+      cdCls(){
+        return this.playing?'play':'play pause'
+      },
+      playIcon(){
+        return this.playing?'icon-pause':'icon-play'
+      },
+      miniIcon(){
+        return this.playing?'icon-pause-mini':'icon-play-mini'
+      },
       ...mapGetters([
         'playList',
         'fullScreen',
-        'songInfo'
+        'currentSong',
+        'playing'
       ])
+    },
+    watch:{
+      currentSong()
+      {
+        this.$nextTick(()=>{
+          this.$refs.audio.play()
+        })
+      },
+      playing(newPlayingState){
+        const audio=this.$refs.audio
+        this.$nextTick(()=>{
+          newPlayingState?audio.play():audio.pause()
+        })
+      }
     },
     methods:{
       closeFullScreen(){
@@ -93,8 +118,11 @@ const transform=prefixStyle('transform')
       openFullScreen(){
         this.setFullScreen(true)
       },
+      togglePlaying(){
+        this.setPlayingState(!this.playing)
+      },
       enter(el,done){
-        // 从小飞到大的动画
+        // js使用动画的四个钩子函数，实现动画：从小飞到大的动画
         const {x,y,scale}=this._getPosAndScale()
 
         let animation={
@@ -151,7 +179,8 @@ const transform=prefixStyle('transform')
         }
       },
       ...mapMutations({
-        setFullScreen:'SET_FULL_SCREEN_STATE'
+        setFullScreen:'SET_FULL_SCREEN_STATE',
+        setPlayingState:'SET_PLAYING_STATE'
       })
     }
   }
@@ -179,7 +208,6 @@ const transform=prefixStyle('transform')
         z-index: -1
         opacity:0.6
         filter:blur(20px)
-
       .top
         position relative
         margin-bottom:25px
@@ -233,6 +261,10 @@ const transform=prefixStyle('transform')
               box-sizing:border-box
               border:10px solid rgba(255,255,255,0.1)
               border-radius:50%
+              &.play
+                animation:rotate 20s linear infinite
+              &.pause
+                animation-play-state paused
               .image
                 position: absolute
                 left: 0
@@ -301,6 +333,10 @@ const transform=prefixStyle('transform')
         padding: 0 10px 0 20px
         img
           border-radius: 50%
+          &.play
+            animation:rotate 20s linear infinite
+          &.pause
+            animation-play-state paused
       .text
         display: flex
         flex-direction: column
@@ -329,4 +365,10 @@ const transform=prefixStyle('transform')
           position: absolute
           left: 0
           top: 0
+  @keyframes rotate
+    0%
+      transform:rotate(0)
+    100%
+      transform:rotate(360deg)
+
 </style>
