@@ -38,6 +38,7 @@ import Scroll from '../../base/scroll/scroll'
 import SongList from '../../base/song-list/song-list'
 import Loading from '../../base/loading/loading'
 import {prefixStyle} from '../../common/js/dom'
+import {mapActions} from 'vuex'
 
 const PRESERVE_SPACE=40
 // 为了便于js中兼容性的设置样式，封装了一个通过能力检测获取的属性名，来设置样式
@@ -84,6 +85,9 @@ const backDropFilter=prefixStyle('backDropFilter')
       }
     },
     methods:{
+      ...mapActions([
+        'setPlay'
+      ]),
       goBack(){
         this.$router.back()
       },
@@ -91,7 +95,12 @@ const backDropFilter=prefixStyle('backDropFilter')
         this.scrollY=pos.y
       },
       selectSong(song,index){
-        this.currentIndex(index)
+        // 根据需求传递值，但对于base组件来说，自己应传什么传什么，与外部业务不必一至。
+        // 通过执行action，提交mutation，设置state的值
+        this.setPlay({
+          list:this.songs,
+          index:index
+        })
       }
     },
     watch:{
