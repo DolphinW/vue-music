@@ -6,7 +6,7 @@ const state = {
   fullScreen: false,
   playList: [],
   sequenceList: [],
-  mode: playMode.normal,
+  mode: playMode.sequence,
   currentIndex: -1
 }
 

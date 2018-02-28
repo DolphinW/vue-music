@@ -8,7 +8,7 @@
     </h1>
     <div class="bgImage" ref="bgImage" :style="setBgImage">
       <div class="play-wrapper">
-        <div ref="playBtn" v-show="songs.length>0" class="play">
+        <div ref="playBtn" v-show="songs.length>0" class="play" @click="musicRandom">
           <i class="icon-play"></i>
           <span class="text">随机播放全部</span>
         </div>
@@ -86,8 +86,14 @@ const backDropFilter=prefixStyle('backDropFilter')
     },
     methods:{
       ...mapActions([
-        'setPlay'
+        'setPlay',
+        'setMusicRandom'
       ]),
+      musicRandom(){
+        this.setMusicRandom({
+          list:this.songs
+        })
+      },
       goBack(){
         this.$router.back()
       },

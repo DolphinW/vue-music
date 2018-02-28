@@ -8,7 +8,7 @@ export const playList = (state) => state.playList
 
 export const sequenceList = (state) => state.sequenceList
 
-export const playmode = (state) => state.mode
+export const mode = (state) => state.mode
 
 export const currentIndex = (state) => state.currentIndex
 

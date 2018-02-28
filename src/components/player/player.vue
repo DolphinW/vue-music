@@ -11,7 +11,7 @@
         </div>
         <div class="top">
           <div class="back" @click="closeFullScreen">
-            <i class="icon icon-back"></i>
+            <i class="icon-back"></i>
           </div>
           <h1 class="title" v-html="currentSong.name"></h1>
           <h2 class="subtitle" v-html="currentSong.singer"></h2>
@@ -37,20 +37,20 @@
             <span class="time time-r">{{_format(currentSong.duration)}}</span>
           </div>
           <div class="operators">
-            <div class="icon i-left">
-              <i class="icon icon-loop"></i>
+            <div class="icon i-left" @click="changePlayMode">
+              <i :class="modeCls"></i>
             </div>
             <div class="icon i-left" :class="disableCls">
-              <i @click="prev()" class="icon icon-prev"></i>
+              <i @click="prev()" class="icon-prev"></i>
             </div>
             <div class="icon i-center">
               <i @click="togglePlaying" :class="playIcon"></i>
             </div>
             <div class="icon i-right" :class="disableCls">
-              <i @click="next()" class="icon icon-next"></i>
+              <i @click="next()" class="icon-next"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon icon-favorite"></i>
+              <i class="icon-favorite"></i>
             </div>
           </div>
         </div>
@@ -66,7 +66,9 @@
           <p class="desc" v-html="currentSong.singer"></p>
         </div>
         <div class="control">
-          <i @click.stop="togglePlaying" :class="miniIcon"></i>
+          <progress-circle :radius="radius" :percent="percent">
+            <i @click.stop="togglePlaying" :class="miniIcon" class="icon-mini"></i>
+          </progress-circle>
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
@@ -77,7 +79,8 @@
            :src="currentSong.url"
            @canplay="ready"
            @error="error"
-           @timeupdate="updateTime"></audio>
+           @timeupdate="updateTime"
+           @ended="end"></audio>
   </div>
 </template>
 
@@ -87,6 +90,9 @@
   import animations from 'create-keyframe-animation'
   import {prefixStyle} from '../../common/js/dom'
   import ProgressBar from '../../base/progress-bar/progress-bar'
+  import ProgressCircle from '../../base/progress-circle/progress-circle'
+  import {playMode} from '../../common/js/config'
+  import {shuffle} from '../../common/js/utils'
 
   const transform = prefixStyle('transform')
 
@@ -95,7 +101,8 @@
     data() {
       return {
         isSongReady: false,
-        currentTime:0
+        currentTime:0,
+        radius:32
       }
     },
     computed: {
@@ -114,16 +121,27 @@
       percent(){
         return this.currentTime/this.currentSong.duration
       },
+      modeCls(){
+        return this.mode===playMode.sequence?'icon-sequence':this.mode===playMode.loop?'icon-loop':'icon-random'
+      },
       ...mapGetters([
         'playList',
         'fullScreen',
         'currentSong',
         'playing',
-        'currentIndex'
+        'currentIndex',
+        'mode',
+        'sequenceList'
       ])
     },
     watch: {
-      currentSong() {
+      currentSong(newSong,oldSong) {
+        if(!newSong.id){
+          return
+        }
+        if(newSong.id===oldSong.id){
+          return
+        }
         this.$nextTick(() => {
           this.$refs.audio.play()
         })
@@ -148,7 +166,32 @@
         }
         this.setPlayingState(!this.playing)
       },
+      changePlayMode(){
+        const mode = (this.mode + 1) % 3
+        this.setPlayMode(mode)
+        let list = null
+        if (mode === playMode.random) {
+          list = shuffle(this.sequenceList)
+        } else {
+          list = this.sequenceList
+        }
+        this.resetCurrentIndex(list)
+        this.setPlayList(list)
+      },
+      resetCurrentIndex(list){
+        let index=list.findIndex((item)=>{
+          return item.id===this.currentSong.id
+        })
+        this.setCurrentIndex(index)
+      },
       prev() {
+        if (!this.isSongReady) {
+          return
+        }
+        if(this.mode===playMode.loop){
+          this.loop()
+          return
+        }
         let index = this.currentIndex - 1
         if (index <= -1) {
           index = this.playList.length - 1
@@ -159,9 +202,28 @@
         }
         this.isSongReady = false
       },
+      end(){
+        if(this.mode===playMode.loop){
+          this.loop()
+        }else{
+          this.next()
+        }
+      },
+      loop(){
+        this.$refs.audio.currentTime=0
+        this.$refs.audio.play()
+        this.setPlayingState(true)
+      },
       next() {
+        if (!this.isSongReady) {
+          return
+        }
+        if(this.mode===playMode.loop){
+          this.loop()
+          return
+        }
         let index = this.currentIndex + 1
-        if (index >= this.playList.length) {
+        if (index === this.playList.length) {
           index = 0
         }
         this.setCurrentIndex(index)
@@ -180,12 +242,11 @@
         this.currentTime=e.target.currentTime
       },
       onPercentChange(newPercent){
-        const newTime=newPercent*this.currentSong.duration
-        this.$refs.audio.currentTime=newTime
-        if(!this.playing){
-          togglePlaying()
+        const currentTime = this.currentSong.duration * newPercent
+        this.$refs.audio.currentTime = currentTime
+        if (!this.playing) {
+          this.togglePlaying()
         }
-
       },
       enter(el, done) {
         // js使用动画的四个钩子函数，实现动画：从小飞到大的动画
@@ -253,20 +314,25 @@
       },
       _pad(time,n=2){
         // 补位
-        let str=time.toString()
-        while(str.length<n){
-          str='0'+str
+        let len=time.toString().length
+        while(len<n){
+          time='0'+time
+          len++
         }
-        return str
+        return time
       },
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN_STATE',
         setPlayingState: 'SET_PLAYING_STATE',
-        setCurrentIndex: 'SET_CURRENT_INDEX'
+        setCurrentIndex: 'SET_CURRENT_INDEX',
+        setPlayMode:'SET_PLAY_MODE',
+        setSequenceList:'SET_SEQUENCE_LIST',
+        setPlayList:'SET_PLAY_LIST'
       })
     },
     components: {
-      ProgressBar
+      ProgressBar,
+      ProgressCircle
     }
   }
 </script>
@@ -476,3 +542,4 @@
       transform: rotate(360deg)
 
 </style>
+

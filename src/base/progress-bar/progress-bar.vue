@@ -4,9 +4,9 @@
       <div class="progress" ref="progress"></div>
       <div class="progress-btn-wrapper"
            ref="progressBtn"
-           @touchstart.prevent="onTouchStart"
-           @touchmove.prevent="onTouchMove"
-           @touchend="onTouchEnd">
+           @touchstart.prevent="onProgressTouchStart"
+           @touchmove.prevent="onProgressTouchMove"
+           @touchend="onProgressTouchEnd">
         <div class="progress-btn"></div>
       </div>
     </div>
@@ -41,23 +41,26 @@
       }
     },
     methods: {
-      onTouchStart(e){
-        this.touch.initPercent=false
+      onProgressTouchStart(e){
+        this.touch.initPercent=true
         this.touch.startX=e.touches[0].pageX
         this.touch.startOffset=this.$refs.progress.clientWidth
       },
-      onTouchMove(e){
-        this.touch.initPercent=true
+      onProgressTouchMove(e){
+        if(!this.touch.initPercent){
+          return
+        }
         const deltaX=e.touches[0].pageX-this.touch.startX
         const newOffset=Math.min(this.$refs.progressBar.clientWidth,Math.max(0,deltaX+this.touch.startOffset))
         this._offset(newOffset)
         this._triggerPercent()
       },
-      onTouchEnd(e){
+      onProgressTouchEnd(e){
         this.touch.initPercent=false
+        this._triggerPercent()
       },
       onProgressClick(e){
-        const offsetLeft=e.pageX-this.$refs.progressBar.offsetLeft-progressBtnWidth/2
+        const offsetLeft=e.pageX-this.$refs.progressBar.offsetLeft
         this._offset(offsetLeft)
         this._triggerPercent()
       },
