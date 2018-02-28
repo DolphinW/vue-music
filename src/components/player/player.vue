@@ -29,18 +29,25 @@
           </div>
         </div>
         <div class="bottom">
+          <div class="progress-wrapper">
+            <span class="time time-l">{{_format(currentTime)}}</span>
+            <div class="progress-bar-wrapper">
+              <progress-bar :percent="percent" @percentChange="onPercentChange"></progress-bar>
+            </div>
+            <span class="time time-r">{{_format(currentSong.duration)}}</span>
+          </div>
           <div class="operators">
             <div class="icon i-left">
               <i class="icon icon-loop"></i>
             </div>
-            <div class="icon i-left">
-              <i class="icon icon-prev"></i>
+            <div class="icon i-left" :class="disableCls">
+              <i @click="prev()" class="icon icon-prev"></i>
             </div>
             <div class="icon i-center">
               <i @click="togglePlaying" :class="playIcon"></i>
             </div>
-            <div class="icon i-right">
-              <i class="icon icon-next"></i>
+            <div class="icon i-right" :class="disableCls">
+              <i @click="next()" class="icon icon-next"></i>
             </div>
             <div class="icon i-right">
               <i class="icon icon-favorite"></i>
@@ -49,7 +56,7 @@
         </div>
       </div>
     </transition>
-    <transition name="mini" >
+    <transition name="mini">
       <div class="mini-player" v-show="!fullScreen" @click="openFullScreen">
         <div class="icon">
           <img :class="cdCls" :src="currentSong.image" width="40" height="40">
@@ -61,127 +68,205 @@
         <div class="control">
           <i @click.stop="togglePlaying" :class="miniIcon"></i>
         </div>
-        <div class="control" >
+        <div class="control">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
-    <audio ref="audio" :src="currentSong.url"></audio>
+    <audio ref="audio"
+           :src="currentSong.url"
+           @canplay="ready"
+           @error="error"
+           @timeupdate="updateTime"></audio>
   </div>
 </template>
 
 <script>
 /* eslint-disable */
-import {mapGetters,mapMutations} from 'vuex'
-import animations from 'create-keyframe-animation'
-import {prefixStyle} from '../../common/js/dom'
+  import {mapGetters, mapMutations} from 'vuex'
+  import animations from 'create-keyframe-animation'
+  import {prefixStyle} from '../../common/js/dom'
+  import ProgressBar from '../../base/progress-bar/progress-bar'
 
-const transform=prefixStyle('transform')
+  const transform = prefixStyle('transform')
 
   export default {
     name: "player",
-    computed:{
-      cdCls(){
-        return this.playing?'play':'play pause'
+    data() {
+      return {
+        isSongReady: false,
+        currentTime:0
+      }
+    },
+    computed: {
+      cdCls() {
+        return this.playing ? 'play' : 'play pause'
       },
-      playIcon(){
-        return this.playing?'icon-pause':'icon-play'
+      playIcon() {
+        return this.playing ? 'icon-pause' : 'icon-play'
       },
-      miniIcon(){
-        return this.playing?'icon-pause-mini':'icon-play-mini'
+      miniIcon() {
+        return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+      },
+      disableCls() {
+        return this.isSongReady ? '' : 'disable'
+      },
+      percent(){
+        return this.currentTime/this.currentSong.duration
       },
       ...mapGetters([
         'playList',
         'fullScreen',
         'currentSong',
-        'playing'
+        'playing',
+        'currentIndex'
       ])
     },
-    watch:{
-      currentSong()
-      {
-        this.$nextTick(()=>{
+    watch: {
+      currentSong() {
+        this.$nextTick(() => {
           this.$refs.audio.play()
         })
       },
-      playing(newPlayingState){
-        const audio=this.$refs.audio
-        this.$nextTick(()=>{
-          newPlayingState?audio.play():audio.pause()
+      playing(newPlayingState) {
+        const audio = this.$refs.audio
+        this.$nextTick(() => {
+          newPlayingState ? audio.play() : audio.pause()
         })
       }
     },
-    methods:{
-      closeFullScreen(){
+    methods: {
+      closeFullScreen() {
         this.setFullScreen(false)
       },
-      openFullScreen(){
+      openFullScreen() {
         this.setFullScreen(true)
       },
-      togglePlaying(){
+      togglePlaying() {
+        if (!this.isSongReady) {
+          return
+        }
         this.setPlayingState(!this.playing)
       },
-      enter(el,done){
-        // js使用动画的四个钩子函数，实现动画：从小飞到大的动画
-        const {x,y,scale}=this._getPosAndScale()
+      prev() {
+        let index = this.currentIndex - 1
+        if (index <= -1) {
+          index = this.playList.length - 1
+        }
+        this.setCurrentIndex(index)
+        if (!this.playing) {
+          this.togglePlaying()
+        }
+        this.isSongReady = false
+      },
+      next() {
+        let index = this.currentIndex + 1
+        if (index >= this.playList.length) {
+          index = 0
+        }
+        this.setCurrentIndex(index)
+        if (!this.playing) {
+          this.togglePlaying()
+        }
+        this.isSongReady = false
+      },
+      ready() {
+        this.isSongReady = true
+      },
+      error() {
+        this.isSongReady = true
+      },
+      updateTime(e){
+        this.currentTime=e.target.currentTime
+      },
+      onPercentChange(newPercent){
+        const newTime=newPercent*this.currentSong.duration
+        this.$refs.audio.currentTime=newTime
+        if(!this.playing){
+          togglePlaying()
+        }
 
-        let animation={
-          0:{
-            transform:`translate3d(${x}px,${y}px,0) scale(${scale})`
+      },
+      enter(el, done) {
+        // js使用动画的四个钩子函数，实现动画：从小飞到大的动画
+        const {x, y, scale} = this._getPosAndScale()
+
+        let animation = {
+          0: {
+            transform: `translate3d(${x}px,${y}px,0) scale(${scale})`
           },
-          60:{
-            transform:`translate3d(0,0,0) scale(1.1)`
+          60: {
+            transform: `translate3d(0,0,0) scale(1.1)`
           },
-          100:{
-            transform:`translate3d(0,0,0) scale(1)`
+          100: {
+            transform: `translate3d(0,0,0) scale(1)`
           }
         }
 
         animations.registerAnimation({
-          name:'move',
+          name: 'move',
           animation,
-          presets:{
-            duration:400,
-            easing:'linear'
+          presets: {
+            duration: 400,
+            easing: 'linear'
           }
         })
 
-        animations.runAnimation(this.$refs.cdWrapper,'move',done)
+        animations.runAnimation(this.$refs.cdWrapper, 'move', done)
 
       },
-      afterEnter(){
+      afterEnter() {
         animations.unregisterAnimation('move')
-        this.$refs.cdWrapper.style.animation=''
+        this.$refs.cdWrapper.style.animation = ''
       },
-      leave(el,done){
-        this.$refs.cdWrapper.style['transition']='all 0.4s'
-        const {x,y,scale}=this._getPosAndScale()
-        this.$refs.cdWrapper.style[transform]=`translate3d(${x}px,${y}px,0) scale(${scale})`
-        this.$refs.cdWrapper.addEventListener('transitionend',done)
+      leave(el, done) {
+        this.$refs.cdWrapper.style['transition'] = 'all 0.4s'
+        const {x, y, scale} = this._getPosAndScale()
+        this.$refs.cdWrapper.style[transform] = `translate3d(${x}px,${y}px,0) scale(${scale})`
+        this.$refs.cdWrapper.addEventListener('transitionend', done)
       },
-      afterLeave(){
-        this.$refs.cdWrapper.style['transition']=''
-        this.$refs.cdWrapper.style[transform]=''
+      afterLeave() {
+        this.$refs.cdWrapper.style['transition'] = ''
+        this.$refs.cdWrapper.style[transform] = ''
       },
-      _getPosAndScale(){
-        const targetWidth=40
-        const targetLeftDistance=40
-        const targetBottomDistance=30
-        const paddingTop=80
-        const cdWidth=window.innerWidth*0.8
-        const scale=targetWidth/cdWidth
-        const x=-(window.innerWidth/2-targetLeftDistance)
-        const y=window.innerHeight-paddingTop-cdWidth/2-targetBottomDistance
+      _getPosAndScale() {
+        const targetWidth = 40
+        const targetLeftDistance = 40
+        const targetBottomDistance = 30
+        const paddingTop = 80
+        const cdWidth = window.innerWidth * 0.8
+        const scale = targetWidth / cdWidth
+        const x = -(window.innerWidth / 2 - targetLeftDistance)
+        const y = window.innerHeight - paddingTop - cdWidth / 2 - targetBottomDistance
         return {
           x,
           y,
           scale
         }
       },
+      _format(time){
+        // 格式化time
+        time=Math.round(time)
+        let min=this._pad(Math.floor(time/60))
+        let second=this._pad(Math.floor(time%60))
+        return min+':'+second
+      },
+      _pad(time,n=2){
+        // 补位
+        let str=time.toString()
+        while(str.length<n){
+          str='0'+str
+        }
+        return str
+      },
       ...mapMutations({
-        setFullScreen:'SET_FULL_SCREEN_STATE',
-        setPlayingState:'SET_PLAYING_STATE'
+        setFullScreen: 'SET_FULL_SCREEN_STATE',
+        setPlayingState: 'SET_PLAYING_STATE',
+        setCurrentIndex: 'SET_CURRENT_INDEX'
       })
+    },
+    components: {
+      ProgressBar
     }
   }
 </script>
@@ -200,31 +285,31 @@ const transform=prefixStyle('transform')
       z-index 150
       background-color: $color-background
       .bg
-        position:absolute
-        top:0
-        left:0
+        position: absolute
+        top: 0
+        left: 0
         width: 100%
         height: 100%
         z-index: -1
-        opacity:0.6
-        filter:blur(20px)
+        opacity: 0.6
+        filter: blur(20px)
       .top
         position relative
-        margin-bottom:25px
+        margin-bottom: 25px
         .back
           position absolute
-          top:0
-          left:6px
-          z-index:50
+          top: 0
+          left: 6px
+          z-index: 50
           .icon-back
             display: block
-            padding:9px
-            font-size:$font-size-large-x
-            color:$color-theme
-            transform:rotate(-90deg)
+            padding: 9px
+            font-size: $font-size-large-x
+            color: $color-theme
+            transform: rotate(-90deg)
         .title
           width: 70%
-          margin:0 auto
+          margin: 0 auto
           line-height: 40px
           text-align: center
           no-wrap()
@@ -236,33 +321,33 @@ const transform=prefixStyle('transform')
           font-size: $font-size-medium
           color: $color-text
       .middle
-        position:fixed
-        width:100%
-        top:80px
-        bottom:170px
-        white-space:nowrap
-        font-size:0
+        position: fixed
+        width: 100%
+        top: 80px
+        bottom: 170px
+        white-space: nowrap
+        font-size: 0
         .middle-l
           display: inline-block
           vertical-align top
-          position:relative
+          position: relative
           width: 100%
           height: 0
           padding-top: 80%
           .cd-wrapper
             position absolute
             left: 10%
-            top:0
+            top: 0
             width: 80%
-            height:100%
+            height: 100%
             .cd
               width: 100%
               height: 100%
-              box-sizing:border-box
-              border:10px solid rgba(255,255,255,0.1)
-              border-radius:50%
+              box-sizing: border-box
+              border: 10px solid rgba(255, 255, 255, 0.1)
+              border-radius: 50%
               &.play
-                animation:rotate 20s linear infinite
+                animation: rotate 20s linear infinite
               &.pause
                 animation-play-state paused
               .image
@@ -282,6 +367,24 @@ const transform=prefixStyle('transform')
         position: absolute
         bottom: 50px
         width: 100%
+        .progress-wrapper
+          display: flex
+          align-item:center
+          width: 80%
+          margin:0 auto
+          padding:10px 0
+          .time
+            color: $color-text
+            font-size: $font-size-small
+            flex: 0 0 30px
+            line-height: 30px
+            width: 30px
+            &.time-l
+              text-align: left
+            &.time-r
+              text-align: right
+          .progress-bar-wrapper
+            flex: 1
         .operators
           display: flex
           align-items: center
@@ -334,7 +437,7 @@ const transform=prefixStyle('transform')
         img
           border-radius: 50%
           &.play
-            animation:rotate 20s linear infinite
+            animation: rotate 20s linear infinite
           &.pause
             animation-play-state paused
       .text
@@ -365,10 +468,11 @@ const transform=prefixStyle('transform')
           position: absolute
           left: 0
           top: 0
+
   @keyframes rotate
     0%
-      transform:rotate(0)
+      transform: rotate(0)
     100%
-      transform:rotate(360deg)
+      transform: rotate(360deg)
 
 </style>
