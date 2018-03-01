@@ -24,9 +24,16 @@
               </div>
             </div>
           </div>
-          <div class="middle-r">
-
-          </div>
+          <scroll class="middle-r" :data="currentLyric && currentLyric.lines" ref="lyricScroll">
+            <div class="lyric-wrapper">
+              <div v-if="currentLyric">
+                <p ref="lyricLine"
+                   class="text"
+                   :class="{current:currentLineNum===index}"
+                   v-for="(line,index) in currentLyric.lines" :key="index">{{line.txt}}</p>
+              </div>
+            </div>
+          </scroll>
         </div>
         <div class="bottom">
           <div class="progress-wrapper">
@@ -93,6 +100,8 @@
   import ProgressCircle from '../../base/progress-circle/progress-circle'
   import {playMode} from '../../common/js/config'
   import {shuffle} from '../../common/js/utils'
+  import Lyric from 'lyric-parser'
+  import Scroll from '../../base/scroll/scroll'
 
   const transform = prefixStyle('transform')
 
@@ -101,8 +110,10 @@
     data() {
       return {
         isSongReady: false,
-        currentTime:0,
-        radius:32
+        currentTime: 0,
+        radius: 32,
+        currentLyric: null,
+        currentLineNum: 0
       }
     },
     computed: {
@@ -118,11 +129,11 @@
       disableCls() {
         return this.isSongReady ? '' : 'disable'
       },
-      percent(){
-        return this.currentTime/this.currentSong.duration
+      percent() {
+        return this.currentTime / this.currentSong.duration
       },
-      modeCls(){
-        return this.mode===playMode.sequence?'icon-sequence':this.mode===playMode.loop?'icon-loop':'icon-random'
+      modeCls() {
+        return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
       },
       ...mapGetters([
         'playList',
@@ -135,15 +146,16 @@
       ])
     },
     watch: {
-      currentSong(newSong,oldSong) {
-        if(!newSong.id){
+      currentSong(newSong, oldSong) {
+        if (!newSong.id) {
           return
         }
-        if(newSong.id===oldSong.id){
+        if (newSong.id === oldSong.id) {
           return
         }
         this.$nextTick(() => {
           this.$refs.audio.play()
+          this.getCurrentLyric()
         })
       },
       playing(newPlayingState) {
@@ -166,7 +178,24 @@
         }
         this.setPlayingState(!this.playing)
       },
-      changePlayMode(){
+      getCurrentLyric() {
+        this.currentSong.getLyric().then(lyric => {
+          this.currentLyric = new Lyric(lyric, this.handleLyric)
+          if (this.playing) {
+            this.currentLyric.play()
+          }
+        })
+      },
+      handleLyric({lineNum, text}) {
+        this.currentLineNum = lineNum
+        const lyric=this.$refs.lyricLine
+        if(lineNum>5){
+          this.$refs.lyricScroll.scrollToElement(lyric[lineNum-5],1000)
+        }else{
+          this.$refs.lyricScroll.scrollTo(0,0,1000)
+        }
+      },
+      changePlayMode() {
         const mode = (this.mode + 1) % 3
         this.setPlayMode(mode)
         let list = null
@@ -178,9 +207,9 @@
         this.resetCurrentIndex(list)
         this.setPlayList(list)
       },
-      resetCurrentIndex(list){
-        let index=list.findIndex((item)=>{
-          return item.id===this.currentSong.id
+      resetCurrentIndex(list) {
+        let index = list.findIndex((item) => {
+          return item.id === this.currentSong.id
         })
         this.setCurrentIndex(index)
       },
@@ -188,7 +217,7 @@
         if (!this.isSongReady) {
           return
         }
-        if(this.mode===playMode.loop){
+        if (this.mode === playMode.loop) {
           this.loop()
           return
         }
@@ -202,15 +231,15 @@
         }
         this.isSongReady = false
       },
-      end(){
-        if(this.mode===playMode.loop){
+      end() {
+        if (this.mode === playMode.loop) {
           this.loop()
-        }else{
+        } else {
           this.next()
         }
       },
-      loop(){
-        this.$refs.audio.currentTime=0
+      loop() {
+        this.$refs.audio.currentTime = 0
         this.$refs.audio.play()
         this.setPlayingState(true)
       },
@@ -218,7 +247,7 @@
         if (!this.isSongReady) {
           return
         }
-        if(this.mode===playMode.loop){
+        if (this.mode === playMode.loop) {
           this.loop()
           return
         }
@@ -238,10 +267,10 @@
       error() {
         this.isSongReady = true
       },
-      updateTime(e){
-        this.currentTime=e.target.currentTime
+      updateTime(e) {
+        this.currentTime = e.target.currentTime
       },
-      onPercentChange(newPercent){
+      onPercentChange(newPercent) {
         const currentTime = this.currentSong.duration * newPercent
         this.$refs.audio.currentTime = currentTime
         if (!this.playing) {
@@ -305,18 +334,18 @@
           scale
         }
       },
-      _format(time){
+      _format(time) {
         // 格式化time
-        time=Math.round(time)
-        let min=this._pad(Math.floor(time/60))
-        let second=this._pad(Math.floor(time%60))
-        return min+':'+second
+        time = Math.round(time)
+        let min = this._pad(Math.floor(time / 60))
+        let second = this._pad(Math.floor(time % 60))
+        return min + ':' + second
       },
-      _pad(time,n=2){
+      _pad(time, n = 2) {
         // 补位
-        let len=time.toString().length
-        while(len<n){
-          time='0'+time
+        let len = time.toString().length
+        while (len < n) {
+          time = '0' + time
           len++
         }
         return time
@@ -325,14 +354,15 @@
         setFullScreen: 'SET_FULL_SCREEN_STATE',
         setPlayingState: 'SET_PLAYING_STATE',
         setCurrentIndex: 'SET_CURRENT_INDEX',
-        setPlayMode:'SET_PLAY_MODE',
-        setSequenceList:'SET_SEQUENCE_LIST',
-        setPlayList:'SET_PLAY_LIST'
+        setPlayMode: 'SET_PLAY_MODE',
+        setSequenceList: 'SET_SEQUENCE_LIST',
+        setPlayList: 'SET_PLAY_LIST'
       })
     },
     components: {
       ProgressBar,
-      ProgressCircle
+      ProgressCircle,
+      Scroll
     }
   }
 </script>
@@ -429,16 +459,27 @@
           width: 100%
           height: 100%
           overflow: hidden
+          .lyric-wrapper
+            width: 80%
+            margin: 0 auto
+            overflow: hidden
+            text-align: center
+            .text
+              line-height: 32px
+              color: $color-text-l
+              font-size: $font-size-medium
+              &.current
+                color: $color-text
       .bottom
         position: absolute
         bottom: 50px
         width: 100%
         .progress-wrapper
           display: flex
-          align-item:center
+          align-item: center
           width: 80%
-          margin:0 auto
-          padding:10px 0
+          margin: 0 auto
+          padding: 10px 0
           .time
             color: $color-text
             font-size: $font-size-small
