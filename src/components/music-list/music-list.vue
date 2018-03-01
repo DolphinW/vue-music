@@ -39,6 +39,7 @@ import SongList from '../../base/song-list/song-list'
 import Loading from '../../base/loading/loading'
 import {prefixStyle} from '../../common/js/dom'
 import {mapActions} from 'vuex'
+import {playListMixin} from "../../common/js/mixin";
 
 const PRESERVE_SPACE=40
 // 为了便于js中兼容性的设置样式，封装了一个通过能力检测获取的属性名，来设置样式
@@ -46,6 +47,7 @@ const transform=prefixStyle('transform')
 const backDropFilter=prefixStyle('backDropFilter')
 
   export default {
+    mixins:[playListMixin],
     name: "music-list",
     data(){
       return {
@@ -89,6 +91,11 @@ const backDropFilter=prefixStyle('backDropFilter')
         'setPlay',
         'setMusicRandom'
       ]),
+      handlePlayList(playlist){
+        const bottom=playlist.length>0?'60px':0
+        this.$refs.list.$el.style.bottom=bottom
+        this.$refs.list.refresh()
+      },
       musicRandom(){
         this.setMusicRandom({
           list:this.songs

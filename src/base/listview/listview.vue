@@ -130,6 +130,9 @@ const FIXED_HEIGHT=30
         let newIndex=this.touch.startIndex+delta
         this._scrollTo(newIndex)
       },
+      refresh(){
+        this.$refs.listScroll.refresh()
+      },
       onSingerClick(item){
         this.$emit('select',item)
       },
