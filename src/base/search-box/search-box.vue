@@ -31,6 +31,7 @@
       clearQuery(){
         this.query=''
       },
+      // 组件的方法可以在外调用
       setQuery(newQuery){
         this.query=newQuery
       }

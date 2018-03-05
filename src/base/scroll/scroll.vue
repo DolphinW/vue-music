@@ -28,6 +28,14 @@
       listenScroll:{
         type:Boolean,
         default:false
+      },
+      pullup:{
+        type:Boolean,
+        default:false
+      },
+      beforeScroll:{
+        type:Boolean,
+        default:false
       }
     },
     mounted(){
@@ -44,10 +52,26 @@
           probeType:this.probeType,
           click:this.click
         })
+
         if(this.listenScroll){
           let _this=this
           this.scroll.on('scroll',(position)=>{
             _this.$emit('scroll',position)
+          })
+        }
+
+
+        if (this.pullup) {
+          this.scroll.on('scrollEnd', () => {
+            if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
+              this.$emit('scrollToEnd')
+            }
+          })
+        }
+
+        if (this.beforeScroll) {
+          this.scroll.on('beforeScrollStart', () => {
+            this.$emit('beforeScroll')
           })
         }
       },

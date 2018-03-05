@@ -1,5 +1,11 @@
 <template>
-  <scroll class="suggest" :data="suggestList">
+  <scroll ref="suggest"
+          class="suggest"
+          :data="suggestList"
+          :pullup="pullup"
+          :beforeScroll="beforeScroll"
+          @scrollToEnd="searchMore"
+          @beforeScroll="listScroll">
     <ul class="suggest-list">
       <li class="suggest-item" v-for="(item,index) in suggestList" :key="index">
         <div class="icon">
@@ -26,17 +32,19 @@
   import {ERR_OK} from '../../api/config'
   import {createSong} from '../../common/js/song'
 
-const perpage = 20
-const TYPE_SINGER=1
+  const perpage = 20
+  const TYPE_SINGER = 1
 
   export default {
     name: "suggest",
-    data(){
+    data() {
       return {
-        suggestList:[],
-        page:1,
-        showNoResult:false,
-        hasMore:true
+        suggestList: [],
+        page: 1,
+        showNoResult: false,
+        hasMore: false,
+        pullup: true,
+        beforeScroll: true
       }
     },
     props: {
@@ -49,50 +57,70 @@ const TYPE_SINGER=1
         default: true
       }
     },
-    computed:{
-
-    },
-    methods:{
-      _search(){
-        search(this.query, this.page, this.showSinger, perpage).then(res=>{
-          if(res.code===ERR_OK){
-            // if(!res.data.song.list.length){
-            //   this.hasMore=false
-            //   return
-            // }
-            this.suggestList=this._genResult(res.data)
-          }else{
-            this.showNoResult=true
+    computed: {},
+    methods: {
+      _search() {
+        this.page = 1
+        this.hasMore = true
+        this.$refs.suggest.scrollTo(0, 0)
+        search(this.query, this.page, this.showSinger, perpage).then(res => {
+          if (res.code === ERR_OK) {
+            this.suggestList = this._genResult(res.data)
+            this._checkMore(res.data)
+          } else {
+            this.showNoResult = true
           }
         })
       },
-      _genResult(data){
-        let ret=[]
-        if(data.zhida && data.zhida.singerid){
-          ret.push({...data.zhida,...{type:TYPE_SINGER}})
+      _checkMore(data) {
+        const song = data.song
+        if (!song.list.length || (song.curnum + song.curpage * perpage) > song.totalnum) {
+          this.hasMore = false
         }
-        if(data.song){
-          ret=ret.concat(this._normalizeSong(data.song.list))
+      },
+      _genResult(data) {
+        let ret = []
+        if(this.page===1){
+          if (data.zhida && data.zhida.singerid) {
+            ret.push({...data.zhida, ...{type: TYPE_SINGER}})
+          }
         }
-        console.log(ret);
+        if (data.song) {
+          ret = ret.concat(this._normalizeSong(data.song.list))
+        }
         return ret
       },
-      _normalizeSong(list){
-        let ret=[]
-        list.forEach(musicData=>{
+      _normalizeSong(list) {
+        let ret = []
+        list.forEach(musicData => {
           ret.push(createSong(musicData))
         })
         return ret
       },
-      setitemIcon(item){
-        return item.type && item.type===TYPE_SINGER ? 'icon-mine':'icon-music'
+      setitemIcon(item) {
+        return item.type && item.type === TYPE_SINGER ? 'icon-mine' : 'icon-music'
       },
-      getItemName(item){
-        return item.singerid?item.singername :item.name
+      getItemName(item) {
+        return item.singerid ? item.singername : item.name
+      },
+      searchMore() {
+        if (!this.hasMore) {
+          return
+        }
+        this.page++
+        search(this.query, this.page, this.showSinger, perpage).then((res) => {
+          if (res.code === ERR_OK) {
+            this.suggestList = this.suggestList.concat(this._genResult(res.data))
+            this._checkMore(res.data)
+          }
+        })
+      },
+      listScroll(){
+
       }
     },
-    watch:{
-      query(){
+    watch: {
+      query() {
         this._search()
       }
     },
