@@ -8,7 +8,8 @@ const state = {
   sequenceList: [],
   mode: playMode.sequence,
   currentIndex: -1,
-  diss: {}
+  diss: {},
+  rank: {}
 }
 
 export default state

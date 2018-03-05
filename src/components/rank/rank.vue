@@ -1,6 +1,6 @@
 <template>
-  <div class='rank'>
-    <scroll class='toplist' :data="topList">
+  <div class='rank' ref="rank">
+    <scroll class='toplist' :data="topList" ref="topList">
       <ul>
         <li @click="selectItem(item)" class='item' v-for='(item,index) in topList' :key='index'>
           <div class='icon'>
@@ -20,6 +20,7 @@
     <div class='loading-container' v-show='!topList.length'>
       <loading></loading>
     </div>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -29,8 +30,13 @@
   import {ERR_OK} from '../../api/config'
   import Loading from '../../base/loading/loading'
   import Scroll from '../../base/scroll/scroll'
+  import {mapMutations,mapGetters} from 'vuex'
+  import {playListMixin} from '../../common/js/mixin'
 
   export default {
+    mixins:[
+      playListMixin
+    ],
     name: 'rank',
     data() {
       return {
@@ -41,6 +47,11 @@
       this._getTopList()
     },
     methods: {
+      handlePlayList(playList){
+        let bottom=playList.length>0?'60px':''
+        this.$refs.rank.style.bottom=bottom
+        this.$refs.topList.refresh()
+      },
       _getTopList() {
         getTopList().then(res => {
           if (res.code === ERR_OK) {
@@ -52,7 +63,16 @@
         this.$router.push({
           path:`/rank/${item.id}`
         })
-      }
+        this.setRank(item)
+      },
+      ...mapMutations({
+        setRank:'SET_RANK'
+      })
+    },
+    computed:{
+      ...mapGetters([
+        'playing'
+      ])
     },
     components: {
       Loading,
