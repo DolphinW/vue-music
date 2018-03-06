@@ -7,7 +7,7 @@
           @scrollToEnd="searchMore"
           @beforeScroll="listScroll">
     <ul class="suggest-list">
-      <li class="suggest-item" v-for="(item,index) in suggestList" :key="index">
+      <li @click="selectItem(item)" class="suggest-item" v-for="(item,index) in suggestList" :key="index">
         <div class="icon">
           <i :class="setitemIcon(item)"></i>
         </div>
@@ -31,6 +31,8 @@
   import {search} from '../../api/search'
   import {ERR_OK} from '../../api/config'
   import {createSong} from '../../common/js/song'
+  import Singer from '../../common/js/singer'
+  import {mapMutations,mapActions} from 'vuex'
 
   const perpage = 20
   const TYPE_SINGER = 1
@@ -59,6 +61,18 @@
     },
     computed: {},
     methods: {
+      selectItem(item){
+        if(item.type && item.type===TYPE_SINGER){
+          let singer=new Singer(item.singermid, item.singername)
+          this.setSinger(singer)
+          this.$router.push({
+            path:`/search/${singer.id}`
+          })
+          return
+        }
+        console.log(item);
+        this.insertSong(item)
+      },
       _search() {
         this.page = 1
         this.hasMore = true
@@ -117,7 +131,13 @@
       },
       listScroll(){
 
-      }
+      },
+      ...mapMutations({
+        setSinger:'SET_SINGER'
+      }),
+      ...mapActions([
+        'insertSong'
+      ])
     },
     watch: {
       query() {
