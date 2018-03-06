@@ -34,25 +34,30 @@ export const setMusicRandom = function ({commit}, {list}) {
 
 export const insertSong = function ({commit, state}, song) {
   let currentIndex = state.currentIndex
+  // 只能在mutations中修改state数据
   let playList = state.playList.slice()
   let sequenceList = state.sequenceList.slice()
   // 当前歌曲
   let currentSong = playList[currentIndex]
   // 查找是否已存在改歌曲
   let fpIndex = findIndex(playList, currentSong)
+  // 在这个索引之前添加，故先增长再添加
+  currentIndex++
   // 插入歌曲
   playList.splice(currentIndex, 0, song)
-  currentIndex++
   // 验证是否已添加过
   if (fpIndex > -1) {
+    // 只要有添加过，就删掉之前添加的
     if (fpIndex < currentIndex) {
       playList.splice(fpIndex, 1)
       currentIndex--
     } else {
+      // 因为在其前面我们增加了currentIndex的song，所以这里索引多1
       playList.splice(fpIndex + 1, 1)
     }
   }
 
+  // 获取当前歌曲要在sequencelist插入的位置，splice 在第一个参数之前添加。
   let currentSIndex = findIndex(sequenceList, currentSong) + 1
   let fsIndex = findIndex(sequenceList, song)
   sequenceList.splice(currentSIndex, 0, song)

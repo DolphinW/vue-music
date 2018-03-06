@@ -17,7 +17,7 @@
       </li>
       <loading v-show="hasMore"></loading>
     </ul>
-    <div class="no-result-wrapper" v-show="showNoResult">
+    <div class="no-result-wrapper" v-show="!hasMore && !suggestList.length">
       <no-result title="抱歉，暂无搜索结果"></no-result>
     </div>
   </scroll>
@@ -43,7 +43,6 @@
       return {
         suggestList: [],
         page: 1,
-        showNoResult: false,
         hasMore: false,
         pullup: true,
         beforeScroll: true
@@ -81,8 +80,6 @@
           if (res.code === ERR_OK) {
             this.suggestList = this._genResult(res.data)
             this._checkMore(res.data)
-          } else {
-            this.showNoResult = true
           }
         })
       },
@@ -130,7 +127,9 @@
         })
       },
       listScroll(){
-
+        // 优化用户体验，因为手机端input获取请求时，会自动打开手机键盘
+        // 此事件用于 当监听到滚动开始时，让input失去焦点，收起手机的键盘。
+        this.$emit('listScroll')
       },
       ...mapMutations({
         setSinger:'SET_SINGER'

@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="search-result" v-show="query">
-      <suggest :query="query"></suggest>
+      <suggest @listScroll="onBlurIpt" :query="query"></suggest>
     </div>
     <router-view></router-view>
   </div>
@@ -65,6 +65,10 @@
       hotSearch(item){
         this.query=item.k
         this.$refs.searchBox.setQuery(item.k)
+      },
+      onBlurIpt(){
+        // 调用searchBox组件的blur方法
+        this.$refs.searchBox.blur()
       }
     }
   }

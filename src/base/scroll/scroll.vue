@@ -68,7 +68,7 @@
             }
           })
         }
-
+        // 用于监听滚动开始事件
         if (this.beforeScroll) {
           this.scroll.on('beforeScrollStart', () => {
             this.$emit('beforeScroll')

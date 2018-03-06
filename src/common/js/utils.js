@@ -13,3 +13,17 @@ export function shuffle(list) {
   console.log(_list)
   return _list
 }
+
+// 节流函数，函数柯里化，执行一个函数，获取另一个函数
+// 通过定义一个定时器，来达到每次都会有一个请求，不会频繁派发多余请求
+export function debounce(func, delay) {
+  let timer
+  return function (...args) {
+    if (timer) {
+      clearTimeout(timer)
+    }
+    timer = setTimeout(() => {
+      func.apply(this, args)
+    }, delay)
+  }
+}
