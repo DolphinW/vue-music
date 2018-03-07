@@ -41,9 +41,9 @@ export const insertSong = function ({commit, state}, song) {
   let playList = state.playList.slice()
   let sequenceList = state.sequenceList.slice()
   // 当前歌曲
-  let currentSong = playList[currentIndex]
-  // 查找是否已存在改歌曲
-  let fpIndex = findIndex(playList, currentSong)
+  // let currentSong = playList[currentIndex]
+  // 查找是否已存在该歌曲
+  let fpIndex = findIndex(playList, song)
   // 在这个索引之前添加，故先增长再添加
   currentIndex++
   // 插入歌曲
@@ -61,7 +61,7 @@ export const insertSong = function ({commit, state}, song) {
   }
 
   // 获取当前歌曲要在sequencelist插入的位置，splice 在第一个参数之前添加。
-  let currentSIndex = findIndex(sequenceList, currentSong) + 1
+  let currentSIndex = findIndex(sequenceList, song) + 1
   let fsIndex = findIndex(sequenceList, song)
   sequenceList.splice(currentSIndex, 0, song)
   if (fsIndex > -1) {

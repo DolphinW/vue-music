@@ -6,7 +6,7 @@ export function insertAry(arr, val, compare, maxLen) {
   let oldIndex = arr.findIndex(compare)
   let ret = arr.slice()
   if (oldIndex == 0) {
-    return
+    return ret
   } else if (oldIndex > 0) {
     ret.splice(oldIndex, 1)
     ret.unshift(val)
