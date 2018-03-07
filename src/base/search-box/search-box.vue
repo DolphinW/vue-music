@@ -38,11 +38,11 @@ import {debounce} from '../../common/js/utils'
       // 组件的方法可以在外调用
       setQuery(newQuery){
         this.query=newQuery
+      },
+      blur(){
+        // 调用input的失去焦点事件
+        this.$refs.queryIpt.blur()
       }
-    },
-    blur(){
-      // 调用input的失去焦点事件
-      this.$refs.queryIpt.blur()
     }
   }
 </script>

@@ -10,7 +10,6 @@ export function shuffle(list) {
     _list[i] = _list[t]
     _list[t] = tmp
   }
-  console.log(_list)
   return _list
 }
 

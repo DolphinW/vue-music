@@ -15,3 +15,5 @@ export const SET_CURRENT_INDEX = 'SET_CURRENT_INDEX'
 export const SET_DISS = 'SET_DISS'
 
 export const SET_RANK = 'SET_RANK'
+
+export const SET_SEARCH_HISTORY = 'SET_SEARCH_HISTORY'

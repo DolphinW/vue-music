@@ -60,6 +60,9 @@
     },
     computed: {},
     methods: {
+      refresh(){
+        this.$refs.suggest.refresh()
+      },
       selectItem(item){
         if(item.type && item.type===TYPE_SINGER){
           let singer=new Singer(item.singermid, item.singername)
@@ -67,10 +70,10 @@
           this.$router.push({
             path:`/search/${singer.id}`
           })
-          return
+        }else{
+          this.insertSong(item)
         }
-        console.log(item);
-        this.insertSong(item)
+        this.$emit('select',item)
       },
       _search() {
         this.page = 1

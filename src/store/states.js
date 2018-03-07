@@ -1,5 +1,7 @@
 import {playMode} from '../common/js/config'
+import {loadSearchHistory} from '../common/js/cache'
 
+// state的初始值可以是普通数值，也可是从localStorage中获取到的。
 const state = {
   singer: {},
   playing: false,
@@ -9,7 +11,8 @@ const state = {
   mode: playMode.sequence,
   currentIndex: -1,
   diss: {},
-  rank: {}
+  rank: {},
+  searchHistory: loadSearchHistory()
 }
 
 export default state

@@ -1,6 +1,7 @@
 import * as types from '../store/mutation-types'
 import {shuffle} from '../common/js/utils'
 import {playMode} from '../common/js/config'
+import {saveSearchHistory, deleteSearchHistory, clearSearchHistory} from '../common/js/cache'
 
 function findIndex(list, song) {
   return list.findIndex((item) => {
@@ -9,6 +10,8 @@ function findIndex(list, song) {
 }
 
 // 同一个动作的mutations封装到一起
+// 对多个mutaitions的封装
+
 export const setPlay = function ({commit, state}, {list, index}) {
   commit(types.SET_SEQUENCE_LIST, list)
   if (state.mode === playMode.random) {
@@ -74,4 +77,16 @@ export const insertSong = function ({commit, state}, song) {
   commit(types.SET_CURRENT_INDEX, currentIndex)
   commit(types.SET_FULL_SCREEN_STATE, true)
   commit(types.SET_PLAYING_STATE, true)
+}
+
+export const setSearchHistory = function ({commit}, query) {
+  commit(types.SET_SEARCH_HISTORY, saveSearchHistory(query))
+}
+
+export const deleteSearch = function ({commit}, query) {
+  commit(types.SET_SEARCH_HISTORY, deleteSearchHistory(query))
+}
+
+export const clearSearch = function ({commit}) {
+  commit(types.SET_SEARCH_HISTORY, clearSearchHistory())
 }
