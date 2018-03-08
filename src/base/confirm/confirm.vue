@@ -5,8 +5,8 @@
         <div class="content">
           <p class="text">{{text}}</p>
           <div class="operators">
-            <div class="operator-btn left" @click="cancel">{{cancelBtnText}}</div>
-            <div class="operator-btn" @click="confirm()">{{confirmBtnText}}</div>
+            <div class="operator-btn left" @click.stop="cancel">{{cancelBtnText}}</div>
+            <div class="operator-btn" @click.stop="confirm()">{{confirmBtnText}}</div>
           </div>
         </div>
       </div>

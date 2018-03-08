@@ -1,42 +1,43 @@
 <template>
   <transition name="list-fade">
-    <div class="play-list">
-      <div class="play-list-wrapper">
-        <div class="header">
+    <div class="play-list" v-show="showFlag" @click="hide">
+      <div class="play-list-wrapper" @click.stop>
+        <div class="header" >
           <h1 class="title">
-            <i class="icon"></i>
-            <span class="text"></span>
-            <span class="clear">
+            <i class="icon" :class="getCurrentModeIcon"></i>
+            <span class="text">{{getCurrentModeText}}</span>
+            <span class="clear" @click="clearAllSongs">
               <i class="icon-clear"></i>
             </span>
           </h1>
         </div>
-        <div class="content">
-          <ul>
-            <li class="item">
-              <i class="current"></i>
-              <span class="text"></span>
+        <Scroll ref="listScroll" class="content" :data="sequenceList">
+          <ul ref="list">
+            <li class="item" v-for="(item,index) in sequenceList" :key="index" @click="selectItem(item,index)">
+              <i class="current" :class="getCurrentIcon(item)"></i>
+              <span class="text">{{item.name}}</span>
               <span class="like">
                 <i class="icon-favorite"></i>
               </span>
-              <span class="delete">
+              <span class="delete" @click.stop="deleteItem(item)">
                 <i class="icon-delete"></i>
               </span>
             </li>
           </ul>
-        </div>
+        </Scroll>
         <div class="operate">
           <div class="add">
             <i class="icon-add"></i>
             <span class="text">添加歌曲到队列</span>
           </div>
         </div>
-        <div class="close">
+        <div class="close" @click="hide">
           <span>
             关闭
           </span>
         </div>
       </div>
+      <confirm ref="confirm" text="是否要清空歌单列表？" confirm-btn-text="清空" @onConfirm="confirmClear"></confirm>
     </div>
   </transition>
 </template>
@@ -45,9 +46,81 @@
 /*eslint-disable*/
   import Scroll from '../../base/scroll/scroll'
   import Confirm from '../../base/confirm/confirm'
+  import {mapGetters,mapMutations,mapActions} from 'vuex'
+  import {playMode} from "../../common/js/config";
 
-  export default {
+export default {
     name: "play-list",
+    data(){
+      return {
+        showFlag:false
+      }
+    },
+    computed:{
+      getCurrentModeText(){
+        return this.mode===playMode.random? '随机播放': this.mode===playMode.loop ?'单曲循环':'顺序播放'
+      },
+      getCurrentModeIcon(){
+        return this.mode===playMode.random? 'icon-random': this.mode===playMode.loop ?'icon-loop':'icon-sequence'
+      },
+      ...mapGetters([
+        'sequenceList',
+        'playList',
+        'currentSong',
+        'mode'
+      ])
+    },
+    methods:{
+      show(){
+        this.showFlag=true
+        // 解决滚动无效的问题
+        setTimeout(()=>{
+          this.$refs.listScroll.refresh()
+          this._scrollToCurrentSong()
+        },200)
+      },
+      hide(){
+        this.showFlag=false
+      },
+      deleteItem(item){
+        this.deleteSong(item)
+      },
+      selectItem(item,index){
+        // 设置playList列表中的index
+        if(this.mode===playMode.random){
+          index=this.playList.findIndex((song)=>{
+            return song.id===item.id
+          })
+        }
+        this.setCurrentIndex(index)
+        this.setPlayingState(true)
+      },
+      getCurrentIcon(item){
+        return item.id===this.currentSong.id ? 'icon-play':''
+      },
+      clearAllSongs(){
+        this.$refs.confirm.open()
+      },
+      confirmClear(){
+        // 清空所有列表
+        this.deleteSongList()
+        this.hide()
+      },
+      _scrollToCurrentSong(){
+        let sIndex=this.sequenceList.findIndex((song)=>{
+          return song.id==this.currentSong.id
+        })
+        this.$refs.listScroll.scrollToElement(this.$refs.list.children[sIndex],300)
+      },
+      ...mapMutations({
+        setCurrentIndex:'SET_CURRENT_INDEX',
+        setPlayingState:'SET_PLAYING_STATE'
+      }),
+      ...mapActions([
+        'deleteSong',
+        'deleteSongList'
+      ])
+    },
     components: {
       Scroll,
       Confirm
@@ -67,9 +140,9 @@
     z-index: 200
     background-color: $color-background-d
     &.list-fade-enter-active,&.list-fade-leave-active
-      transition: opacity 4s
+      transition: opacity .4s
       .play-list-wrapper
-        transition:all 4s
+        transition:all .4s
     &.list-fade-enter,&.list-fade-leave-to
       opacity:0
       .play-list-wrapper

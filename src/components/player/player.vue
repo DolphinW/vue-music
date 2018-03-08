@@ -90,12 +90,12 @@
             <i @click.stop="togglePlaying" :class="miniIcon" class="icon-mini"></i>
           </progress-circle>
         </div>
-        <div class="control">
+        <div class="control" @click.stop="showList">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
-    <play-list></play-list>
+    <play-list ref="list"></play-list>
     <audio ref="audio"
            :src="currentSong.url"
            @canplay="ready"
@@ -189,6 +189,9 @@
       }
     },
     methods: {
+      showList(){
+        this.$refs.list.show()
+      },
       closeFullScreen() {
         this.setFullScreen(false)
       },
