@@ -59,6 +59,7 @@ export default {
     data(){
       return {
         showFlag:false,
+        // 这个数值会影响添加歌曲后，在playlist中列表的显示
         refreshDelay:200
       }
     },
