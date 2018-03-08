@@ -4,7 +4,7 @@
       <div class="play-list-wrapper" @click.stop>
         <div class="header" >
           <h1 class="title">
-            <i class="icon" :class="getCurrentModeIcon"></i>
+            <i class="icon" :class="modeCls" @click="changePlayMode"></i>
             <span class="text">{{getCurrentModeText}}</span>
             <span class="clear" @click="clearAllSongs">
               <i class="icon-clear"></i>
@@ -12,7 +12,7 @@
           </h1>
         </div>
         <Scroll ref="listScroll" class="content" :data="sequenceList">
-          <ul ref="list">
+          <transition-group name="list" tag="ul" ref="list">
             <li class="item" v-for="(item,index) in sequenceList" :key="index" @click="selectItem(item,index)">
               <i class="current" :class="getCurrentIcon(item)"></i>
               <span class="text">{{item.name}}</span>
@@ -23,20 +23,21 @@
                 <i class="icon-delete"></i>
               </span>
             </li>
-          </ul>
+          </transition-group>
         </Scroll>
         <div class="operate">
-          <div class="add">
+          <div class="add" @click.stop="showAddSong">
             <i class="icon-add"></i>
             <span class="text">添加歌曲到队列</span>
           </div>
         </div>
-        <div class="close" @click="hide">
+        <div class="close" @click.stop="hide">
           <span>
             关闭
           </span>
         </div>
       </div>
+      <add-song ref="addSong"></add-song>
       <confirm ref="confirm" text="是否要清空歌单列表？" confirm-btn-text="清空" @onConfirm="confirmClear"></confirm>
     </div>
   </transition>
@@ -48,8 +49,12 @@
   import Confirm from '../../base/confirm/confirm'
   import {mapGetters,mapMutations,mapActions} from 'vuex'
   import {playMode} from "../../common/js/config";
+  import {playerMixin} from '../../common/js/mixin'
+  import AddSong from '../../components/add-song/add-song'
+
 
 export default {
+  mixins:[playerMixin],
     name: "play-list",
     data(){
       return {
@@ -59,9 +64,6 @@ export default {
     computed:{
       getCurrentModeText(){
         return this.mode===playMode.random? '随机播放': this.mode===playMode.loop ?'单曲循环':'顺序播放'
-      },
-      getCurrentModeIcon(){
-        return this.mode===playMode.random? 'icon-random': this.mode===playMode.loop ?'icon-loop':'icon-sequence'
       },
       ...mapGetters([
         'sequenceList',
@@ -76,14 +78,20 @@ export default {
         // 解决滚动无效的问题
         setTimeout(()=>{
           this.$refs.listScroll.refresh()
-          this._scrollToCurrentSong()
-        },200)
+          this._scrollToCurrentSong(this.currentSong)
+        },20)
       },
       hide(){
         this.showFlag=false
       },
+      showAddSong(){
+        this.$refs.addSong.show()
+      },
       deleteItem(item){
         this.deleteSong(item)
+        if (!this.playList.length) {
+          this.hide()
+        }
       },
       selectItem(item,index){
         // 设置playList列表中的index
@@ -106,11 +114,11 @@ export default {
         this.deleteSongList()
         this.hide()
       },
-      _scrollToCurrentSong(){
+      _scrollToCurrentSong(current){
         let sIndex=this.sequenceList.findIndex((song)=>{
-          return song.id==this.currentSong.id
+          return song.id==current.id
         })
-        this.$refs.listScroll.scrollToElement(this.$refs.list.children[sIndex],300)
+        this.$refs.listScroll.scrollToElement(this.$refs.list.$el.children[sIndex],300)
       },
       ...mapMutations({
         setCurrentIndex:'SET_CURRENT_INDEX',
@@ -121,9 +129,20 @@ export default {
         'deleteSongList'
       ])
     },
+    watch:{
+      currentSong(newSong,oldSong){
+        if(!this.showFlag || newSong.id === oldSong.id){
+          return
+        }
+        setTimeout(()=>{
+          this._scrollToCurrentSong(newSong)
+        },20)
+      }
+    },
     components: {
       Scroll,
-      Confirm
+      Confirm,
+      AddSong
     }
   }
 </script>
@@ -182,6 +201,10 @@ export default {
           height: 40px
           padding: 0 30px 0 20px
           overflow: hidden
+          &.list-enter-active, &.list-leave-active
+            transition: all 0.1s
+          &.list-enter, &.list-leave-to
+            height: 0
           .current
             flex: 0 0 20px
             width: 20px

@@ -111,11 +111,15 @@ export const deleteSong = function ({commit, state}, song) {
   commit(types.SET_PLAY_LIST, playList)
   commit(types.SET_CURRENT_INDEX, currentIndex)
   commit(types.SET_SEQUENCE_LIST, sequenceList)
-  if (!playList.length) {
-    commit(types.SET_PLAYING_STATE, false)
-  } else {
-    commit(types.SET_PLAYING_STATE, true)
-  }
+
+  const playingState = playList.length > 0
+  commit(types.SET_PLAYING_STATE, playingState)
+  //
+  // if (!playList.length) {
+  //   commit(types.SET_PLAYING_STATE, false)
+  // } else {
+  //   commit(types.SET_PLAYING_STATE, true)
+  // }
 }
 
 export const deleteSongList = function ({commit}) {
