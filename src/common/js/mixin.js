@@ -1,4 +1,4 @@
-import {mapGetters, mapMutations} from 'vuex'
+import {mapGetters, mapMutations, mapActions} from 'vuex'
 import {playMode} from '../../common/js/config'
 import {shuffle} from '../../common/js/utils'
 
@@ -60,5 +60,46 @@ export const playerMixin = {
       setPlayList: 'SET_PLAY_LIST',
       setSequenceList: 'SET_SEQUENCE_LIST'
     })
+  }
+}
+
+export const searchMixin = {
+  data() {
+    return {
+      query: '',
+      refreshDelay: 100
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'searchHistory'
+    ])
+  },
+  methods: {
+    onSelectResultItem() {
+      this.saveSearch(this.query)
+    },
+    onBlurIpt() {
+      // 调用searchBox组件的blur方法
+      this.$refs.searchBox.blur()
+    },
+    onSelectSearchHistory(item) {
+      // 与热门词搜索调用方法一样
+      this.query = item
+      this.addQuery(item)
+    },
+    addQuery(query) {
+      this.$refs.searchBox.setQuery(query)
+    },
+    onDeleteSearchHistory(item) {
+      this.deleteSearch(item)
+    },
+    _updateQuery(newQuery) {
+      this.query = newQuery
+    },
+    ...mapActions([
+      'saveSearch',
+      'deleteSearch'
+    ])
   }
 }

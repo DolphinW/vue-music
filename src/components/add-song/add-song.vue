@@ -8,29 +8,38 @@
         </div>
       </div>
       <div class="search-box-wrapper">
-        <search-box @updateQuery="_updateQuery" ref="searchBox" placeholder="搜索歌曲"></search-box>
+        <search-box  :showSinger="showSinger" @updateQuery="_updateQuery" ref="searchBox" placeholder="搜索歌曲"></search-box>
       </div>
       <div class="switch-wrapper" v-show="!query">
-        <switches :data="ary"></switches>
+        <switches @toggle="toggleSwitch" :data="switches" :currentSwitch="currentSwitch"></switches>
       </div>
-      <div class="shortcut">
+      <div class="shortcut" v-show="!query">
         <div class="list-wrapper">
-          <div class="list-scroll">
+          <Scroll :refreshDelay="refreshDelay" ref="songList" class="list-scroll" :data="searchHistory" v-if="currentSwitch===0">
             <div class="list-inner">
-
+              <song-list :songs="playHistory" @select="selectSong"></song-list>
             </div>
-          </div>
-          <div class="list-scroll">
+          </Scroll>
+          <Scroll :refreshDelay="refreshDelay" ref="searchList" class="list-scroll" :data="searchHistory" v-if="currentSwitch===1">
             <div class="list-inner">
-
+              <search-list @select="onSelectSearchHistory"
+                           @delete="onDeleteSearchHistory"
+                           :data="searchHistory"></search-list>
             </div>
-          </div>
+          </Scroll>
         </div>
       </div>
       <div class="search-result" v-show="query">
-        <suggest :query="query" ref="suggest"></suggest>
+        <suggest @listScroll="onBlurIpt" @select="selectSuggest" :query="query" ref="suggest"></suggest>
       </div>
-
+      <top-tip ref="tip" @click.stop="hideTip">
+        <div class="tips">
+          <div class="icon">
+            <i class="icon-ok"></i>
+          </div>
+          <div class="text">已成功添加歌曲到列表！</div>
+        </div>
+      </top-tip>
     </div>
   </transition>
 </template>
@@ -41,29 +50,68 @@ import SearchBox from '../../base/search-box/search-box'
 import Scroll from '../../base/scroll/scroll'
 import Suggest from '../../components/suggest/suggest'
 import Switches from '../../base/switches/switches'
+import {searchMixin} from '../../common/js/mixin'
+import SearchList from '../../base/search-list/search-list'
+import SongList from '../../base/song-list/song-list'
+import {mapGetters,mapActions} from 'vuex'
+import Song from '../../common/js/song'
+import TopTip from '../../base/top-tip/top-tip'
 
   export default {
+    mixins:[searchMixin],
     name: "add-song",
     data(){
       return {
         showFlag:false,
-        query:'',
-        ary:[
-          "添加歌曲",
-          "个人收藏"
+        showSinger:false,
+        currentSwitch:0,
+        switches:[
+          {name:"最近播放"},
+          {name:"搜索历史"}
         ]
       }
+    },
+    computed:{
+      ...mapGetters([
+        'playHistory'
+      ])
     },
     methods:{
       show(){
         this.showFlag=true
+        setTimeout(()=>{
+          if(this.currentSwitch===0){
+            this.$refs.songList.refresh()
+          }else{
+            this.$refs.searchList.refresh()
+          }
+        },20)
       },
       hide(){
         this.showFlag=false
       },
-      _updateQuery(newQuery){
-        this.query=newQuery
-      }
+      toggleSwitch(index){
+        this.currentSwitch=index
+      },
+      selectSuggest(){
+        this.onSelectResultItem()
+        this.showTip()
+      },
+      selectSong(song,index){
+        if(index!=0){
+          this.insertSong(new Song(song))
+        }
+        this.showTip()
+      },
+      showTip(){
+        this.$refs.tip.show()
+      },
+      hideTip(){
+        this.$refs.tip.hide()
+      },
+      ...mapActions([
+        'insertSong'
+      ])
     },
     watch:{
       query(){
@@ -76,7 +124,10 @@ import Switches from '../../base/switches/switches'
       SearchBox,
       Scroll,
       Suggest,
-      Switches
+      Switches,
+      SearchList,
+      SongList,
+      TopTip
     }
   }
 </script>
@@ -145,4 +196,7 @@ import Switches from '../../base/switches/switches'
       .text
         font-size: $font-size-medium
         color: $color-text
+  .tips
+    display: flex
+    justify-content center
 </style>

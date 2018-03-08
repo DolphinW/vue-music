@@ -36,6 +36,10 @@
       beforeScroll:{
         type:Boolean,
         default:false
+      },
+      refreshDelay:{
+        type:Number,
+        default:20
       }
     },
     mounted(){
@@ -59,7 +63,6 @@
             _this.$emit('scroll',position)
           })
         }
-
 
         if (this.pullup) {
           this.scroll.on('scrollEnd', () => {

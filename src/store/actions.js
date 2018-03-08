@@ -1,7 +1,7 @@
 import * as types from '../store/mutation-types'
 import {shuffle} from '../common/js/utils'
 import {playMode} from '../common/js/config'
-import {saveSearchHistory, deleteSearchHistory, clearSearchHistory} from '../common/js/cache'
+import {saveSearchHistory, deleteSearchHistory, clearSearchHistory, savePlayHistory} from '../common/js/cache'
 
 function findIndex(list, song) {
   return list.findIndex((item) => {
@@ -79,7 +79,7 @@ export const insertSong = function ({commit, state}, song) {
   commit(types.SET_PLAYING_STATE, true)
 }
 
-export const setSearchHistory = function ({commit}, query) {
+export const saveSearch = function ({commit}, query) {
   commit(types.SET_SEARCH_HISTORY, saveSearchHistory(query))
 }
 
@@ -127,4 +127,8 @@ export const deleteSongList = function ({commit}) {
   commit(types.SET_PLAY_LIST, [])
   commit(types.SET_SEQUENCE_LIST, [])
   commit(types.SET_PLAYING_STATE, false)
+}
+
+export const savePlay = function ({commit}, song) {
+  commit(types.SET_PLAY_HISTORY, savePlayHistory(song))
 }

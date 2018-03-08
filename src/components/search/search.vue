@@ -4,7 +4,7 @@
       <search-box @updateQuery="_updateQuery" ref="searchBox"></search-box>
     </div>
     <div class="shortcut-wrapper" v-show="!query" ref="shotCutWrapper">
-      <scroll :data="shotCut" class="shortcut" ref="shotcut">
+      <scroll :refreshDelay="refreshDelay" :data="shotCut" class="shortcut" ref="shotcut">
         <div>
           <div class="hot-key">
             <h1 class="title">热门搜索</h1>
@@ -44,17 +44,16 @@
   import Suggest from '../suggest/suggest'
   import {mapGetters,mapActions} from 'vuex'
   import SearchList from '../../base/search-list/search-list'
-  import {playListMixin} from '../../common/js/mixin'
+  import {playListMixin,searchMixin} from '../../common/js/mixin'
   import Scroll from '../../base/scroll/scroll'
   import Confirm from '../../base/confirm/confirm'
 
   export default {
-    mixins:[playListMixin],
+    mixins:[playListMixin,searchMixin],
     name: 'search',
     data() {
       return {
-        hotKeys: [],
-        query: ''
+        hotKeys: []
       }
     },
     created() {
@@ -100,9 +99,6 @@
         this.clearSearch()
         this.$refs.confirmBox.close()
       },
-      _updateQuery(newQuery) {
-        this.query = newQuery
-      },
       initHotKey() {
         getHotKey().then(res => {
           if (res.code === ERR_OK) {
@@ -112,25 +108,9 @@
       },
       hotSearch(item){
         this.query=item
-        this.$refs.searchBox.setQuery(item)
-      },
-      onBlurIpt(){
-        // 调用searchBox组件的blur方法
-        this.$refs.searchBox.blur()
-      },
-      onSelectResultItem(){
-        this.setSearchHistory(this.query)
-      },
-      onSelectSearchHistory(item){
-        // 与热门词搜索调用方法一样
-        this.hotSearch(item)
-      },
-      onDeleteSearchHistory(item){
-        this.deleteSearch(item)
+        this.addQuery(item)
       },
       ...mapActions([
-        'setSearchHistory',
-        'deleteSearch',
         'clearSearch'
       ])
     }

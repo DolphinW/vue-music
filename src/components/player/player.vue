@@ -107,7 +107,7 @@
 
 <script>
 /* eslint-disable */
-  import {mapGetters, mapMutations} from 'vuex'
+  import {mapGetters, mapMutations,mapActions} from 'vuex'
   import animations from 'create-keyframe-animation'
   import {prefixStyle} from '../../common/js/dom'
   import ProgressBar from '../../base/progress-bar/progress-bar'
@@ -177,7 +177,7 @@ import {playerMixin} from '../../common/js/mixin'
         setTimeout(()=>{
           this.$refs.audio.play()
           this.getCurrentLyric()
-        })
+        },20)
       },
       playing(newPlayingState) {
         const audio = this.$refs.audio
@@ -280,6 +280,7 @@ import {playerMixin} from '../../common/js/mixin'
       },
       ready() {
         this.isSongReady = true
+        this.savePlay(this.currentSong)
       },
       error() {
         this.isSongReady = true
@@ -425,7 +426,10 @@ import {playerMixin} from '../../common/js/mixin'
         setFullScreen: 'SET_FULL_SCREEN_STATE',
         setPlayingState: 'SET_PLAYING_STATE',
         setCurrentIndex: 'SET_CURRENT_INDEX'
-      })
+      }),
+      ...mapActions([
+        'savePlay'
+      ])
     },
     components: {
       ProgressBar,

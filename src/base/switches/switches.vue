@@ -1,7 +1,11 @@
 <template>
   <div class="switches">
-    <div @click="toggleSwitch(item,index)" class="item" v-for="(item,index) in data" :key="index" :class="{'current':currentSwitch===index}">
-      {{item}}
+    <div v-for="(item,index) in data"
+         @click="toggleSwitch(index)"
+         class="item"
+         :key="index"
+         :class="{'current':currentSwitch===index}">
+      {{item.name}}
     </div>
   </div>
 </template>
@@ -10,20 +14,19 @@
 /*eslint-disable*/
   export default {
     name: "switches",
-    props:{
-      data:{
-        type:Array,
-        default:[]
+    props: {
+      data: {
+        type: Array,
+        default: []
       },
-      currentSwitch:{
-        type:Number,
-        default:0
+      currentSwitch: {
+        type: Number,
+        default: 0
       }
     },
-    methods:{
-      toggleSwitch(item,index){
-        this.currentSwitch=index
-        this.$emit('toggle',item)
+    methods: {
+      toggleSwitch(index) {
+        this.$emit('toggle', index)
       }
     }
   }
@@ -36,14 +39,14 @@
     height: 100%
     display: flex
     width: 100%
-    border-radius:5px
+    border-radius: 5px
     .item
-      flex:1
-      padding:8px
+      flex: 1
+      padding: 8px
       text-align center
       font-size: $font-size-medium
       color: $color-text
-      border:1px solid $color-highlight-background
+      border: 1px solid $color-highlight-background
       &.current
         background-color: $color-highlight-background
 </style>

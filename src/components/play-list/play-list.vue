@@ -11,7 +11,7 @@
             </span>
           </h1>
         </div>
-        <Scroll ref="listScroll" class="content" :data="sequenceList">
+        <Scroll :refreshDelay="refreshDelay" ref="listScroll" class="content" :data="sequenceList">
           <transition-group name="list" tag="ul" ref="list">
             <li class="item" v-for="(item,index) in sequenceList" :key="index" @click="selectItem(item,index)">
               <i class="current" :class="getCurrentIcon(item)"></i>
@@ -58,7 +58,8 @@ export default {
     name: "play-list",
     data(){
       return {
-        showFlag:false
+        showFlag:false,
+        refreshDelay:200
       }
     },
     computed:{
@@ -79,7 +80,7 @@ export default {
         setTimeout(()=>{
           this.$refs.listScroll.refresh()
           this._scrollToCurrentSong(this.currentSong)
-        },20)
+        },this.refreshDelay)
       },
       hide(){
         this.showFlag=false

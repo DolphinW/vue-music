@@ -21,3 +21,5 @@ export const diss = (state) => state.diss
 export const rank = (state) => state.rank
 
 export const searchHistory = (state) => state.searchHistory
+
+export const playHistory = (state) => state.playHistory
