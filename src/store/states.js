@@ -1,5 +1,5 @@
 import {playMode} from '../common/js/config'
-import {loadSearchHistory, loadPlayHistory} from '../common/js/cache'
+import {loadSearchHistory, loadPlayHistory, loadFavoriteList} from '../common/js/cache'
 
 // state的初始值可以是普通数值，也可是从localStorage中获取到的。
 const state = {
@@ -13,7 +13,8 @@ const state = {
   diss: {},
   rank: {},
   searchHistory: loadSearchHistory(),
-  playHistory: loadPlayHistory()
+  playHistory: loadPlayHistory(),
+  favoriteList: loadFavoriteList()
 }
 
 export default state

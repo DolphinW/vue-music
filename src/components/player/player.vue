@@ -70,7 +70,7 @@
               <i @click="next()" class="icon-next"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon-favorite"></i>
+              <i class="icon icon-favorite" :class="getFavoriteIcon(currentSong)" @click="toggleFavorite(currentSong)"></i>
             </div>
           </div>
         </div>
@@ -611,6 +611,8 @@ import {playerMixin} from '../../common/js/mixin'
             text-align: left
           .icon-favorite
             color: $color-sub-theme
+          .icon-not-favorite
+            color: $color-theme
       &.normal-enter-active, &.normal-leave-active
         transition: all 0.4s
         .top, .bottom

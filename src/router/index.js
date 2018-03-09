@@ -58,8 +58,8 @@ export default new Router({
       ]
     },
     {
-      path:'/user',
-      component:UserCenter
+      path: '/user',
+      component: UserCenter
     }
   ]
 })
