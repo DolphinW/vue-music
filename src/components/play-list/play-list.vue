@@ -47,7 +47,7 @@
 /*eslint-disable*/
   import Scroll from '../../base/scroll/scroll'
   import Confirm from '../../base/confirm/confirm'
-  import {mapGetters,mapMutations,mapActions} from 'vuex'
+  import {mapActions} from 'vuex'
   import {playMode} from "../../common/js/config";
   import {playerMixin} from '../../common/js/mixin'
   import AddSong from '../../components/add-song/add-song'
@@ -66,13 +66,7 @@ export default {
     computed:{
       getCurrentModeText(){
         return this.mode===playMode.random? '随机播放': this.mode===playMode.loop ?'单曲循环':'顺序播放'
-      },
-      ...mapGetters([
-        'sequenceList',
-        'playList',
-        'currentSong',
-        'mode'
-      ])
+      }
     },
     methods:{
       show(){
@@ -81,7 +75,7 @@ export default {
         setTimeout(()=>{
           this.$refs.listScroll.refresh()
           this._scrollToCurrentSong(this.currentSong)
-        },this.refreshDelay)
+        },20)
       },
       hide(){
         this.showFlag=false
@@ -122,10 +116,6 @@ export default {
         })
         this.$refs.listScroll.scrollToElement(this.$refs.list.$el.children[sIndex],300)
       },
-      ...mapMutations({
-        setCurrentIndex:'SET_CURRENT_INDEX',
-        setPlayingState:'SET_PLAYING_STATE'
-      }),
       ...mapActions([
         'deleteSong',
         'deleteSongList'
@@ -151,6 +141,7 @@ export default {
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import "~common/stylus/variable"
+  @import "~common/stylus/mixin"
 
   .play-list
     position: fixed
@@ -161,9 +152,9 @@ export default {
     z-index: 200
     background-color: $color-background-d
     &.list-fade-enter-active,&.list-fade-leave-active
-      transition: opacity .4s
+      transition: opacity .3s
       .play-list-wrapper
-        transition:all .4s
+        transition:all .3s
     &.list-fade-enter,&.list-fade-leave-to
       opacity:0
       .play-list-wrapper

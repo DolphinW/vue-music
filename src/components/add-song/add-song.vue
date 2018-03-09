@@ -32,7 +32,7 @@
       <div class="search-result" v-show="query">
         <suggest @listScroll="onBlurIpt" @select="selectSuggest" :query="query" ref="suggest"></suggest>
       </div>
-      <top-tip ref="tip" @click.stop="hideTip">
+      <top-tip ref="tip">
         <div class="tips">
           <div class="icon">
             <i class="icon-ok"></i>
@@ -105,9 +105,6 @@ import TopTip from '../../base/top-tip/top-tip'
       },
       showTip(){
         this.$refs.tip.show()
-      },
-      hideTip(){
-        this.$refs.tip.hide()
       },
       ...mapActions([
         'insertSong'

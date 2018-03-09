@@ -33,6 +33,9 @@ export const playerMixin = {
       return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
     },
     ...mapGetters([
+      'sequenceList',
+      'playlist',
+      'currentSong',
       'mode'
     ])
   },
@@ -58,7 +61,8 @@ export const playerMixin = {
     ...mapMutations({
       setPlayMode: 'SET_PLAY_MODE',
       setPlayList: 'SET_PLAY_LIST',
-      setSequenceList: 'SET_SEQUENCE_LIST'
+      setCurrentIndex: 'SET_CURRENT_INDEX',
+      setPlayingState: 'SET_PLAYING_STATE'
     })
   }
 }
@@ -67,7 +71,7 @@ export const searchMixin = {
   data() {
     return {
       query: '',
-      refreshDelay: 100
+      refreshDelay: 120
     }
   },
   computed: {

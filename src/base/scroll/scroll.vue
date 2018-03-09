@@ -97,9 +97,12 @@
     watch:{
       data(){
         // 注意：这里需要$nextTick，否则滚动无效。
-        this.$nextTick(()=>{
+        // this.$nextTick(()=>{
+        //   this.refresh()
+        // })
+        setTimeout(()=>{
           this.refresh()
-        })
+        },this.refreshDelay)
       }
     }
   }
