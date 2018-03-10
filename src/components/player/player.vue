@@ -208,9 +208,9 @@ import {playerMixin} from '../../common/js/mixin'
       },
       getCurrentLyric() {
         this.currentSong.getLyric().then(lyric => {
-          if(this.currentSong.lyric==lyric){
-            return
-          }
+          // if(this.currentSong.lyric===lyric){
+          //   return
+          // }
           this.currentLyric = new Lyric(lyric, this.handleLyric)
           if (this.playing) {
             this.currentLyric.play()

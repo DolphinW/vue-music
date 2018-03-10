@@ -11,8 +11,8 @@ import store from './store'
 // Vue.config.productionTip = false
 
 /* eslint-disable no-unused-vars */
-import vConsole from 'vconsole'
-console.log('test')
+// import vConsole from 'vconsole'
+
 
 fastclick.attach(document.body)
 
