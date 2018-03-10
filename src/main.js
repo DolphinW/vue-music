@@ -10,6 +10,10 @@ import store from './store'
 /* eslint-disable */
 // Vue.config.productionTip = false
 
+/* eslint-disable no-unused-vars */
+import vConsole from 'vconsole'
+console.log('test')
+
 fastclick.attach(document.body)
 
 // 全局声明懒加载，设置默认图。

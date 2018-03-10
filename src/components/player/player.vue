@@ -98,7 +98,7 @@
     <play-list ref="list"></play-list>
     <audio ref="audio"
            :src="currentSong.url"
-           @canplay="ready"
+           @play="ready"
            @error="error"
            @timeupdate="updateTime"
            @ended="end"></audio>
@@ -174,7 +174,8 @@ import {playerMixin} from '../../common/js/mixin'
         if(this.currentLyric){
           this.currentLyric.stop()
         }
-        setTimeout(()=>{
+        clearTimeout(this.timer)
+        this.timer=setTimeout(()=>{
           this.$refs.audio.play()
           this.getCurrentLyric()
         },20)
@@ -207,6 +208,9 @@ import {playerMixin} from '../../common/js/mixin'
       },
       getCurrentLyric() {
         this.currentSong.getLyric().then(lyric => {
+          if(this.currentSong.lyric==lyric){
+            return
+          }
           this.currentLyric = new Lyric(lyric, this.handleLyric)
           if (this.playing) {
             this.currentLyric.play()
